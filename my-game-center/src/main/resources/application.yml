@@ -1,0 +1,7 @@
+logging:
+  config: file:resource/log4j2.xml # 配置日志文件
+server:
+  port: 5003 # 服务器端口
+spring:
+  application:
+    name: game-center-server

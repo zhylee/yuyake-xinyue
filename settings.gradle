@@ -1,2 +1,3 @@
 rootProject.name = 'xinyue'
+include 'my-game-center'
 
