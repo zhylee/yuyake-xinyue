@@ -1,3 +1,4 @@
 dependencies {
+    implementation(project(":my-game-network-param"))
     implementation 'org.springframework.boot:spring-boot-starter-web'
 }

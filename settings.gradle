@@ -1,3 +1,5 @@
 rootProject.name = 'xinyue'
 include 'my-game-center'
+include 'my-game-network-param'
+include 'my-game-common'
 
