@@ -1,0 +1,82 @@
+/**
+ * 这里的依赖都是项目的基础依赖，将来添加的子项目都会继承这些依赖。在这里配
+ * 置，可以减少重复的配置，也便于版本升级。当需要修改版本的时候，只需要修改
+ * 这里就可以了，子项目依赖的版本就会自动变化。
+ */
+
+// 定义扩展属性（给脚本用的脚本）
+buildscript {
+    // 定义公共版本号
+    ext {
+        springBootVersion = "2.5.1"
+        springManagementVersion = "1.0.10.RELEASE"
+        springCloudVersion = "2020.0.3"
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath "io.spring.gradle:dependency-management-plugin:${springManagementVersion}"
+    }
+}
+
+allprojects {
+    group = 'cn.yuyake'
+    version = '0.0.1-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'  // spring boot 插件
+    apply plugin: 'io.spring.dependency-management'  // spring 版本管理插件
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    // Spring Cloud 文档 https://spring.io/projects/spring-cloud
+    dependencyManagement {
+        // 配置 Spring Cloud 依赖管理
+        imports {
+            // 注意里面的版本，不同的版本，代码会有一些差别 2.4.x, 2.5.x (Starting with 2020.0.3)
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
+    // 依赖降级和排除 https://docs.gradle.org/current/userguide/dependency_downgrade_and_exclude.html
+    dependencies {
+        implementation('org.springframework.boot:spring-boot-starter') {
+            // 去掉 Spring Boot 默认的日志，使用下面的 log4j2
+            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        }
+        // 引入 log4j2 的日志框架
+        implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+        // 引入测试包
+        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+            // 去掉 Junit 的依赖
+            exclude group: 'org.junit.jupiter', module: 'junit-jupiter'
+        }
+        // 引入 TestNG 单元测试框架
+        implementation 'org.testng:testng:7.4.0'
+        // 引入配置管理
+        implementation 'org.springframework.boot:spring-boot-configuration-processor'
+        // 引入健康监控
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        // 引入 Consul 客户端，用于服务发现
+        implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
+        // 引用 Spring Cloud Bus 依赖的消息队列，Kafka
+        implementation 'org.springframework.cloud:spring-cloud-starter-bus-kafka'
+    }
+}
+
+
+//test {
+//	useJUnitPlatform()
+//}
