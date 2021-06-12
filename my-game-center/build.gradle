@@ -4,7 +4,7 @@ bootJar {
 }
 
 dependencies {
-    implementation(project(":my-game-network-param"))
-    implementation(project(":my-game-dao"))
+    implementation project(":my-game-network-param")
+    implementation project(":my-game-dao")
     implementation 'org.springframework.boot:spring-boot-starter-web'
 }
