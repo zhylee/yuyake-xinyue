@@ -27,7 +27,7 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'org.springframework.boot'  // spring boot 插件
     apply plugin: 'io.spring.dependency-management'  // spring 版本管理插件
     sourceCompatibility = '11'
@@ -42,12 +42,11 @@ subprojects {
     }
 
     // Spring Cloud 文档 https://spring.io/projects/spring-cloud
-    dependencyManagement {
-        // 配置 Spring Cloud 依赖管理
-        imports {
-            // 注意里面的版本，不同的版本，代码会有一些差别 2.4.x, 2.5.x (Starting with 2020.0.3)
-            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-        }
+    // 原文的dependencyManagement声明整套组件的BOM已经过时，使用原生的platform指令更加简洁
+    // 技术平台的使用方，仅需添加一行 platform() 即可管理一组依赖约束
+    dependencies {
+        api platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+        api platform("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}")
     }
 
     // 依赖降级和排除 https://docs.gradle.org/current/userguide/dependency_downgrade_and_exclude.html
@@ -74,9 +73,9 @@ subprojects {
         // 引用 Spring Cloud Bus 依赖的消息队列，Kafka
         implementation 'org.springframework.cloud:spring-cloud-starter-bus-kafka'
     }
+
+    test {
+        // 要用junit可以换成：useJUnitPlatform()
+        useTestNG()
+    }
 }
-
-
-//test {
-//	useJUnitPlatform()
-//}
