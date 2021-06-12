@@ -1,9 +1,8 @@
 package cn.yuyake.common.utils;
 
+import cn.yuyake.common.error.TokenException;
 import com.alibaba.fastjson.JSON;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 
 import java.util.Date;
 
@@ -32,6 +31,21 @@ public class JWTUtil {
         Date exp = new Date(expMillis);
         builder.setExpiration(exp);
         return builder.compact();
+    }
+
+    public static TokenBody getTokenBody(String token) throws TokenException {
+        try {
+            Claims claims = Jwts.parser().setSigningKey(TOKEN_SECRET).parseClaimsJws(token).getBody();
+            String subject = claims.getSubject();
+            TokenBody tokenBody = JSON.parseObject(subject, TokenBody.class);
+            return tokenBody;
+        } catch (Throwable e) {
+            TokenException exp = new TokenException("token解析失败", e);
+            if (e instanceof ExpiredJwtException) {
+                exp.setExpire(true);
+            }
+            throw exp;
+        }
     }
 
     public static class TokenBody {

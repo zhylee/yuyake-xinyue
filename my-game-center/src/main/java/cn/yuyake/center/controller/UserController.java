@@ -1,11 +1,16 @@
 package cn.yuyake.center.controller;
 
+import cn.yuyake.center.service.PlayerService;
 import cn.yuyake.center.service.UserLoginService;
 import cn.yuyake.common.error.GameErrorException;
 import cn.yuyake.common.error.IServerError;
+import cn.yuyake.common.error.TokenException;
 import cn.yuyake.common.utils.JWTUtil;
+import cn.yuyake.db.entity.Player;
 import cn.yuyake.db.entity.UserAccount;
+import cn.yuyake.error.GameCenterError;
 import cn.yuyake.http.MessageCode;
+import cn.yuyake.http.request.CreatePlayerParam;
 import cn.yuyake.http.request.LoginParam;
 import cn.yuyake.http.response.LoginResult;
 import cn.yuyake.http.response.ResponseEntity;
@@ -17,12 +22,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController // RestController = Controller + ResponseBody
 @RequestMapping("/request")
 public class UserController {
 
     @Autowired
     private UserLoginService userLoginService;
+    @Autowired
+    private PlayerService playerService;
 
     private final static Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -45,5 +54,33 @@ public class UserController {
         loginResult.setToken(token);
         logger.debug("user {} 登陆成功", userAccount);
         return new ResponseEntity<>(loginResult);
+    }
+
+    @PostMapping(MessageCode.CREATE_PLAYER)
+    public ResponseEntity<Player> createPlayer(@RequestBody CreatePlayerParam param, HttpServletRequest request) {
+        param.checkParam();
+        // 从http 包头里面获取 token 的值
+        String token = request.getHeader("token");
+        if (token == null) {
+            throw GameErrorException.newBuilder(GameCenterError.TOKEN_FAILED).build();
+        }
+        JWTUtil.TokenBody tokenBody;
+        try {
+            tokenBody = JWTUtil.getTokenBody(token);// 从加密的token中获取明文信息
+        } catch (TokenException e) {
+            throw GameErrorException.newBuilder(GameCenterError.TOKEN_FAILED).build();
+        }
+        String openId = tokenBody.getOpenId();
+        // 使用网关之后，就可以在这里直接获取openId，网关那边会自动验证权限，如果没有使用网关，需要打开上面注释，并注释掉下面这行代码。
+        // String openId = userLoginService.getOpenIdFromHeader(request);
+        UserAccount userAccount = userLoginService.getUserAccountByOpenId(openId).get();
+        String zoneId = param.getZoneId();
+        Player player = userAccount.getPlayerInfo().get(zoneId);
+        if (player == null) { // 如果没有创建角色，创建角色
+            player = playerService.createPlayer(param.getZoneId(), param.getNickName());
+        }
+        userAccount.getPlayerInfo().put(zoneId, player);
+        ResponseEntity<Player> response = new ResponseEntity<>(player);
+        return response;
     }
 }

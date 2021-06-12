@@ -44,4 +44,8 @@ public class UserLoginService {
         logger.debug("user {} 注册成功", userAccount);
         return userAccount;
     }
+
+    public Optional<UserAccount> getUserAccountByOpenId(String openId) {
+        return this.userAccountDao.findById(openId);
+    }
 }

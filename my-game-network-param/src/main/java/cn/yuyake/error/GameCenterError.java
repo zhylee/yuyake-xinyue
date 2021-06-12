@@ -9,6 +9,10 @@ public enum GameCenterError implements IServerError {
     OPENID_LEN_ERROR(21, "openId长度不对"),
     SDK_TOKEN_ERROR(3, "SDK token错误"),
     SDK_TOKEN_LEN_ERROR(31, "sdk token 长度不对"),
+    NICKNAME_EXIST(4, "昵称已存在"),
+    ZONE_ID_IS_EMPTY(5, "zoneId为空"),
+    NICKNAME_IS_EMPTY(6, "昵称为空"),
+    NICKNAME_LEN_ERROR(7, "昵称长度不对"),
     TOKEN_FAILED(8,"token错误"),
     ;
 
