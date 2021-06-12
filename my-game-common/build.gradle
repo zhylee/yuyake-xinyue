@@ -1,4 +1,6 @@
 dependencies {
     // 使用 api 需要使用 plugin: 'java-library'；被 api 标记的将会传递下去
     api 'com.alibaba:fastjson:1.2.76'
+
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
 }

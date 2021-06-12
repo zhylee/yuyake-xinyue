@@ -1,4 +1,10 @@
+// SpringBoot Plugin生效的非常关键的设置
+bootJar {
+    mainClass.set('cn.yuyake.center.WebGameCenterServerMain')
+}
+
 dependencies {
     implementation(project(":my-game-network-param"))
+    implementation(project(":my-game-dao"))
     implementation 'org.springframework.boot:spring-boot-starter-web'
 }

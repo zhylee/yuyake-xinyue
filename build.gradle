@@ -41,6 +41,13 @@ subprojects {
         mavenCentral()
     }
 
+    configurations {
+        // 去掉 Spring Boot 默认的日志，使用 log4j2
+        all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        // 去掉 Junit 的依赖，使用 TestNG 单元测试框架
+        all*.exclude group: 'org.junit.jupiter', module: 'junit-jupiter'
+    }
+
     // Spring Cloud 文档 https://spring.io/projects/spring-cloud
     // 原文的dependencyManagement声明整套组件的BOM已经过时，使用原生的platform指令更加简洁
     // 技术平台的使用方，仅需添加一行 platform() 即可管理一组依赖约束
@@ -51,19 +58,13 @@ subprojects {
 
     // 依赖降级和排除 https://docs.gradle.org/current/userguide/dependency_downgrade_and_exclude.html
     dependencies {
-        implementation('org.springframework.boot:spring-boot-starter') {
-            // 去掉 Spring Boot 默认的日志，使用下面的 log4j2
-            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
-        }
+        implementation 'org.springframework.boot:spring-boot-starter'
         // 引入 log4j2 的日志框架
         implementation 'org.springframework.boot:spring-boot-starter-log4j2'
         // 引入测试包
-        testImplementation('org.springframework.boot:spring-boot-starter-test') {
-            // 去掉 Junit 的依赖
-            exclude group: 'org.junit.jupiter', module: 'junit-jupiter'
-        }
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
         // 引入 TestNG 单元测试框架
-        implementation 'org.testng:testng:7.4.0'
+        testImplementation 'org.testng:testng:7.4.0'
         // 引入配置管理
         implementation 'org.springframework.boot:spring-boot-configuration-processor'
         // 引入健康监控

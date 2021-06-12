@@ -1,7 +1,20 @@
 logging:
-  config: file:resource/log4j2.xml # 配置日志文件
+  # SpringBoot - 配置文件application.yml使用详解（附：Profile多环境配置） https://www.hangge.com/blog/cache/detail_2459.html
+  config: classpath:log4j2.xml # 配置日志文件
 server:
   port: 5003 # 服务器端口
 spring:
   application:
     name: game-center-server
+  data:
+    mongodb:
+      host: localhost # 修改为自己的数据库地址
+      port: 27017
+      username: my-game # 修改为自己的数据库用户名
+      password: xxx123456 # 修改为自己的数据库密码
+      authentication-database: admin
+      database: my-game
+  redis:
+    host: localhost # 修改为自己的 Redis 服务地址
+    port: 6379
+    password: xxx123456
