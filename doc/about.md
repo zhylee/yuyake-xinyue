@@ -15,3 +15,20 @@
 
 - [java字符串常量池----intern方法总结](https://www.liangzl.com/get-article-detail-149074.html)
 - [Java中String做为synchronized同步锁](https://www.huaweicloud.com/articles/5f0cc8c134c69cbb462770dcee5cf282.html)
+
+## docker run mongodb
+
+```
+docker pull mongo:latest
+docker run -itd --name mongo -p 27017:27017 mongo --auth
+docker exec -it mongo mongo admin
+
+db.createUser({ user:'admin',pwd:'admin',roles:[ { role:'userAdminAnyDatabase', db: 'admin'},"readWriteAnyDatabase"]});
+db.auth('admin', 'admin')
+db.createUser({ user:'my-game',pwd:'xxx123456',roles:[ { role:'readWrite', db: 'my-game'}]});
+db.auth('my-game', 'xxx123456')
+```
+
+## 其他内容
+
+- [JWT TOKEN not javax/xml/bind](https://blog.csdn.net/fanfuqiang/article/details/116993993)

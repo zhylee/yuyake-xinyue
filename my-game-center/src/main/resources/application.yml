@@ -8,13 +8,14 @@ spring:
     name: game-center-server
   data:
     mongodb:
-      host: localhost # 修改为自己的数据库地址
+      host: 192.168.110.232 # 修改为自己的数据库地址
       port: 27017
       username: my-game # 修改为自己的数据库用户名
       password: xxx123456 # 修改为自己的数据库密码
       authentication-database: admin
       database: my-game
   redis:
-    host: localhost # 修改为自己的 Redis 服务地址
+    host: 192.168.110.232 # 修改为自己的 Redis 服务地址
     port: 6379
-    password: xxx123456
+    password: R6YMtyPGS0f968IM
+    database: 10

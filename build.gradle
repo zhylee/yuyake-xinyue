@@ -58,6 +58,9 @@ subprojects {
 
     // 依赖降级和排除 https://docs.gradle.org/current/userguide/dependency_downgrade_and_exclude.html
     dependencies {
+        // 使用 JWT 时 Java 11 不会自带 javax.xml.bind 相关的包，额外引入
+        implementation 'com.sun.xml.bind:jaxb-impl:3.0.1'
+        // 引入 Spring Boot
         implementation 'org.springframework.boot:spring-boot-starter'
         // 引入 log4j2 的日志框架
         implementation 'org.springframework.boot:spring-boot-starter-log4j2'
@@ -66,13 +69,13 @@ subprojects {
         // 引入 TestNG 单元测试框架
         testImplementation 'org.testng:testng:7.4.0'
         // 引入配置管理
-        implementation 'org.springframework.boot:spring-boot-configuration-processor'
+        // implementation 'org.springframework.boot:spring-boot-configuration-processor'
         // 引入健康监控
-        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        // implementation 'org.springframework.boot:spring-boot-starter-actuator'
         // 引入 Consul 客户端，用于服务发现
-        implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
+        // implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
         // 引用 Spring Cloud Bus 依赖的消息队列，Kafka
-        implementation 'org.springframework.cloud:spring-cloud-starter-bus-kafka'
+        // implementation 'org.springframework.cloud:spring-cloud-starter-bus-kafka'
     }
 
     test {
