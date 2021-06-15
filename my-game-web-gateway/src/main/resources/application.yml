@@ -15,4 +15,24 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true # 开启与服务发现组件结合，通过 serviceId 转发到具体的服务
+######################################### 手动配置 ###########################################
+          enabled: false # 关闭自动路由配置
+      routes: # 手动配置路由信息
+      - id: game-center-server
+        uri: lb://game-center-server   # 配置服务id
+        predicates:
+        - name: Path
+          args:
+            pattern: /game-center-server/** # 匹配的 URL 模式，URL 的路径必须以 game-center-server 开发，包括它所有的子路径
+        filters:
+        - name: RewritePath
+          args:
+            regexp: /game-center-server/(?<remaining>.*)
+            replacement: /${remaining}
+################################# 与 Consul组合自动配置路由信息 #################################
+#          enabled: true # 开启与服务发现组件结合，通过 serviceId 转发到具体的服务
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' # 可从 Consul 中获取所有注册成功的服务信息，并自动生成每个服务匹配的路径信息
