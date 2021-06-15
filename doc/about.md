@@ -16,7 +16,9 @@
 - [java字符串常量池----intern方法总结](https://www.liangzl.com/get-article-detail-149074.html)
 - [Java中String做为synchronized同步锁](https://www.huaweicloud.com/articles/5f0cc8c134c69cbb462770dcee5cf282.html)
 
-## docker run mongodb
+## docker
+
+### redis
 
 ```
 docker pull mongo:latest
@@ -27,6 +29,13 @@ db.createUser({ user:'admin',pwd:'admin',roles:[ { role:'userAdminAnyDatabase', 
 db.auth('admin', 'admin')
 db.createUser({ user:'my-game',pwd:'xxx123456',roles:[ { role:'readWrite', db: 'my-game'}]});
 db.auth('my-game', 'xxx123456')
+```
+
+### consul
+
+```
+docker pull consul:latest
+docker run -d --name consul -p 8500:8500 consul agent -dev -ui --client=0.0.0.0
 ```
 
 ## 其他内容

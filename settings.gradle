@@ -3,4 +3,5 @@ include 'my-game-center'
 include 'my-game-network-param'
 include 'my-game-common'
 include 'my-game-dao'
+include 'my-game-web-gateway'
 

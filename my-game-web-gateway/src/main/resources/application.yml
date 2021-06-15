@@ -1,0 +1,18 @@
+logging:
+  config: classpath:log4j2.xml # 配置日志文件
+server:
+  port: 5001 # 服务器端口
+spring:
+  application:
+    name: game-web-gateway-server
+  cloud:
+    consul:
+      host: 192.168.110.232 # Consul 地址，需要替换成自己的服务地址
+      port: 8500 # Consul 端口
+      discovery:
+        prefer-ip-address: true # 默认向 Consul 服务中心注册的是当前主机的 hostname，这里选择使用 IP
+        ip-address: 192.168.110.48 # 向 Consul 服务中心注册的 IP
+    gateway:
+      discovery:
+        locator:
+          enabled: true # 开启与服务发现组件结合，通过 serviceId 转发到具体的服务

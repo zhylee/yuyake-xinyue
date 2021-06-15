@@ -19,3 +19,10 @@ spring:
     port: 6379
     password: R6YMtyPGS0f968IM
     database: 10
+  cloud:
+    consul:
+      host: 192.168.110.232 # Consul 服务的地址
+      port: 8500 # Consul 服务的端口
+      discovery:
+        prefer-ip-address: true # IP 地址注册优先
+        ip-address: 192.168.110.48 # 要注册的服务IP
