@@ -59,20 +59,20 @@ public class UserController {
     @PostMapping(MessageCode.CREATE_PLAYER)
     public ResponseEntity<Player> createPlayer(@RequestBody CreatePlayerParam param, HttpServletRequest request) {
         param.checkParam();
-        // 从http 包头里面获取 token 的值
-        String token = request.getHeader("token");
-        if (token == null) {
-            throw GameErrorException.newBuilder(GameCenterError.TOKEN_FAILED).build();
-        }
-        JWTUtil.TokenBody tokenBody;
-        try {
-            tokenBody = JWTUtil.getTokenBody(token);// 从加密的token中获取明文信息
-        } catch (TokenException e) {
-            throw GameErrorException.newBuilder(GameCenterError.TOKEN_FAILED).build();
-        }
-        String openId = tokenBody.getOpenId();
+//        // 从http 包头里面获取 token 的值
+//        String token = request.getHeader("token");
+//        if (token == null) {
+//            throw GameErrorException.newBuilder(GameCenterError.TOKEN_FAILED).build();
+//        }
+//        JWTUtil.TokenBody tokenBody;
+//        try {
+//            tokenBody = JWTUtil.getTokenBody(token);// 从加密的token中获取明文信息
+//        } catch (TokenException e) {
+//            throw GameErrorException.newBuilder(GameCenterError.TOKEN_FAILED).build();
+//        }
+//        String openId = tokenBody.getOpenId();
         // 使用网关之后，就可以在这里直接获取openId，网关那边会自动验证权限，如果没有使用网关，需要打开上面注释，并注释掉下面这行代码。
-        // String openId = userLoginService.getOpenIdFromHeader(request);
+        String openId = userLoginService.getOpenIdFromHeader(request);
         UserAccount userAccount = userLoginService.getUserAccountByOpenId(openId).get();
         String zoneId = param.getZoneId();
         Player player = userAccount.getPlayerInfo().get(zoneId);

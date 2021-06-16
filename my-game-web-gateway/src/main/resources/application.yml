@@ -36,3 +36,9 @@ management:
     web:
       exposure:
         include: '*' # 可从 Consul 中获取所有注册成功的服务信息，并自动生成每个服务匹配的路径信息
+
+gateway:
+  filter:
+    white-request-uri:
+    - /request/10001 # 登录请求的URL
+    - /test/https

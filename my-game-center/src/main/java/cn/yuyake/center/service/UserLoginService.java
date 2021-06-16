@@ -1,6 +1,7 @@
 package cn.yuyake.center.service;
 
 import cn.yuyake.common.error.IServerError;
+import cn.yuyake.common.utils.CommonField;
 import cn.yuyake.dao.UserAccountDao;
 import cn.yuyake.db.entity.UserAccount;
 import cn.yuyake.http.request.LoginParam;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 @Service
@@ -47,5 +49,9 @@ public class UserLoginService {
 
     public Optional<UserAccount> getUserAccountByOpenId(String openId) {
         return this.userAccountDao.findById(openId);
+    }
+
+    public String getOpenIdFromHeader(HttpServletRequest request) {
+        return request.getHeader(CommonField.OPEN_ID);
     }
 }

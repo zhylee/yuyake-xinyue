@@ -1,3 +1,4 @@
 dependencies {
+    api project(":my-game-common")
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
 }
