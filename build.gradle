@@ -60,6 +60,8 @@ subprojects {
     dependencies {
         // 使用 JWT 时 Java 11 不会自带 javax.xml.bind 相关的包，额外引入
         implementation 'com.sun.xml.bind:jaxb-impl:3.0.1'
+        // 引入 guava 简化开发所需
+        implementation 'com.google.guava:guava:31.0.1-jre'
         // 引入 Spring Boot
         implementation 'org.springframework.boot:spring-boot-starter'
         // 引入 log4j2 的日志框架

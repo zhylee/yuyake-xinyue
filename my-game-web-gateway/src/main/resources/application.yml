@@ -41,4 +41,7 @@ gateway:
   filter:
     white-request-uri:
     - /request/10001 # 登录请求的URL
-    - /test/https
+    user-request-rate-count: 3
+    global-request-rate-count: 3000
+    cache-user-max-count: 5000
+    cache-user-timeout: 30000

@@ -42,8 +42,8 @@ public class GameCenterLoadBalancer implements ReactorServiceInstanceLoadBalance
         DefaultRequestContext requestContext = (DefaultRequestContext) request.getContext();
         RequestData clientRequest = (RequestData) requestContext.getClientRequest();
         HttpHeaders headers = clientRequest.getHeaders();
-        // 从 HTTP 的请求 Header 中获取用户的 token 值，作为负载均衡的 key
-        String routeKey = headers.getFirst(CommonField.TOKEN);
+        // 从 HTTP 的请求 Header 中获取用户的 openId 值，作为负载均衡的 key
+        String routeKey = headers.getFirst(CommonField.OPEN_ID);
         if (routeKey == null) {
             // 如果为空，随机分配
             int index = new Random().nextInt(serviceInstances.size());
