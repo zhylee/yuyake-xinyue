@@ -55,3 +55,20 @@ docker run -d --name consul -p 8500:8500 consul agent -dev -ui --client=0.0.0.0
 ## 其他内容
 
 - [JWT TOKEN not javax/xml/bind](https://blog.csdn.net/fanfuqiang/article/details/116993993)
+
+## HTTPS 证书
+
+Google mkcert 是一个简单、零配置的本地证书生成工具
+
+- [windows使用mkcert配置本地https环境](https://blog.zwying.com/archives/51.html)
+
+```
+C:\Users\admin\Downloads\mkcert-v1.4.3-windows-amd64.exe -install -pkcs12 my-game-web
+```
+
+这里要注意，生成的证书都是在当前目录下。也就是你cmd窗口里的位置。默认配置`alias=1`, `password=changeit`
+
+修改方式：
+
+- [使用mkcert生成本地安全的SSL证书](https://www.jianshu.com/p/5064fef8c577)
+

@@ -2,6 +2,12 @@ logging:
   config: classpath:log4j2.xml # 配置日志文件
 server:
   port: 5001 # 服务器端口
+  ssl:
+    enabled: true # 开启 HTTPS 验证
+    key-alias: 1
+    key-store: classpath:my-game-web.p12 # 证书配置
+    key-store-password: changeit # 证书密码
+    key-store-type: PKCS12 # 证书类型
 spring:
   application:
     name: game-web-gateway-server
@@ -12,6 +18,8 @@ spring:
       discovery:
         prefer-ip-address: true # 默认向 Consul 服务中心注册的是当前主机的 hostname，这里选择使用 IP
         ip-address: 192.168.110.48 # 向 Consul 服务中心注册的 IP
+        register: false # 因为只有网关会转发到其他服务，所以这里关闭网关向 consul 注册
+        scheme: https # 注册 scheme，这样 consul 会以 https 的方式访问网关服务
     gateway:
       discovery:
         locator:
@@ -41,6 +49,7 @@ gateway:
   filter:
     white-request-uri:
     - /request/10001 # 登录请求的URL
+    - /test/https
     user-request-rate-count: 3
     global-request-rate-count: 3000
     cache-user-max-count: 5000
