@@ -7,7 +7,7 @@ spring:
     name: game-web-gateway-server
   cloud:
     consul:
-      host: 192.168.110.232 # Consul 地址，需要替换成自己的服务地址
+      host: 192.168.63.131 # Consul 地址，需要替换成自己的服务地址
       port: 8500 # Consul 端口
       discovery:
         prefer-ip-address: true # 默认向 Consul 服务中心注册的是当前主机的 hostname，这里选择使用 IP

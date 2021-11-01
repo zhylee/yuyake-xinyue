@@ -16,11 +16,25 @@
 - [java字符串常量池----intern方法总结](https://www.liangzl.com/get-article-detail-149074.html)
 - [Java中String做为synchronized同步锁](https://www.huaweicloud.com/articles/5f0cc8c134c69cbb462770dcee5cf282.html)
 
+## Spring Cloud LoadBalancer
+
+Spring Cloud Ribbon 已被弃用，在 `2020.0.0` 之后不再发布。建议使用 Spring Cloud LoadBalancer 代替：[Spring Cloud 2020.0.0 正式发布，对开发者来说意味着什么？](https://zhuanlan.zhihu.com/p/340700505)
+
+- [Spring Cloud LoadBalancer 官方文档](https://docs.spring.io/spring-cloud-commons/docs/current/reference/html/#spring-cloud-loadbalancer)
+- [Spring Cloud LoadBalancer 官方指南](https://spring.io/guides/gs/spring-cloud-loadbalancer/)
+- [Spring Cloud LoadBalancer 详细示例](https://github.com/spring-cloud-samples/spring-cloud-intro-demo)
+
+---
+
+- [Spring Cloud Gateway + Nacos 无法发现服务](https://www.cnblogs.com/flying607/p/14657543.html)
+
 ## docker
 
 ### redis
 
 ```
+docker run --name redis -p 6379:6379 -d --restart=always redis:latest redis-server --appendonly yes --requirepass "R6YMtyPGS0f968IM"
+
 docker pull mongo:latest
 docker run -itd --name mongo -p 27017:27017 mongo --auth
 docker exec -it mongo mongo admin
