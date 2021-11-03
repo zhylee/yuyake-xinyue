@@ -1,7 +1,7 @@
 logging:
   config: classpath:log4j2.xml
 server:
-  port: 6002
+  port: ${game.gateway.server.config.port}
 spring:
   application:
     name: game-gateway-001

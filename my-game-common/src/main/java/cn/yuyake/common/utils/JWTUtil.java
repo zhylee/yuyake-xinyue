@@ -15,7 +15,7 @@ public class JWTUtil {
         return getUserToken(openId, userId, 0, "-1");
     }
 
-    private static String getUserToken(String openId, long userId, long playerId, String serverId, String... params) {
+    public static String getUserToken(String openId, long userId, long playerId, String serverId, String... params) {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;//使用对称加密算法生成签名
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);

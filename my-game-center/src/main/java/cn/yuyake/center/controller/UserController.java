@@ -1,5 +1,7 @@
 package cn.yuyake.center.controller;
 
+import cn.yuyake.center.dataconfig.GameGatewayInfo;
+import cn.yuyake.center.service.GameGatewayService;
 import cn.yuyake.center.service.PlayerService;
 import cn.yuyake.center.service.UserLoginService;
 import cn.yuyake.common.error.GameErrorException;
@@ -12,6 +14,8 @@ import cn.yuyake.error.GameCenterError;
 import cn.yuyake.http.MessageCode;
 import cn.yuyake.http.request.CreatePlayerParam;
 import cn.yuyake.http.request.LoginParam;
+import cn.yuyake.http.request.SelectGameGatewayParam;
+import cn.yuyake.http.response.GameGatewayInfoMsg;
 import cn.yuyake.http.response.LoginResult;
 import cn.yuyake.http.response.ResponseEntity;
 import org.slf4j.Logger;
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.ExecutionException;
 
 @RestController // RestController = Controller + ResponseBody
 @RequestMapping("/request")
@@ -32,6 +37,8 @@ public class UserController {
     private UserLoginService userLoginService;
     @Autowired
     private PlayerService playerService;
+    @Autowired
+    private GameGatewayService gameGatewayService;
 
     private final static Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -82,5 +89,18 @@ public class UserController {
         userAccount.getPlayerInfo().put(zoneId, player);
         ResponseEntity<Player> response = new ResponseEntity<>(player);
         return response;
+    }
+
+    @PostMapping(MessageCode.SELECT_GAME_GATEWAY)
+    public ResponseEntity<GameGatewayInfoMsg> selectGameGateway(@RequestBody SelectGameGatewayParam param) throws ExecutionException {
+        long playerId = param.getPlayerId();
+        GameGatewayInfo gameGatewayInfo = gameGatewayService.getGameGatewayInfo(playerId);
+        logger.debug("player {} 获取游戏服务器网关信息成功：{}", playerId, gameGatewayInfo);
+        GameGatewayInfoMsg gameGatewayInfoMsg = new GameGatewayInfoMsg(gameGatewayInfo.getId(),
+                gameGatewayInfo.getIp(), gameGatewayInfo.getPort());
+        String token = playerService.createToken(param);
+        gameGatewayInfoMsg.setToken(token);
+        ResponseEntity<GameGatewayInfoMsg> responseEntity = new ResponseEntity<>(gameGatewayInfoMsg);
+        return responseEntity;
     }
 }

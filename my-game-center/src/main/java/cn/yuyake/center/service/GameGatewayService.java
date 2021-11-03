@@ -19,16 +19,17 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 游戏服务器网关服务类
  * <p>
- *     1. 在服务启动之后，从服务发现组件中刷新网关服务实例列表
- *     2. 实现负载均衡策略，根据角色ID（playerId）选择返回一个合适的网关信息
- *     3. 保证同一个角色ID在一定时间内获取的都是同一个网关信息
- *     4. 定时刷新网关服务实例列表，使网关服务列表保持最新状态
+ * 1. 在服务启动之后，从服务发现组件中刷新网关服务实例列表
+ * 2. 实现负载均衡策略，根据角色ID（playerId）选择返回一个合适的网关信息
+ * 3. 保证同一个角色ID在一定时间内获取的都是同一个网关信息
+ * 4. 定时刷新网关服务实例列表，使网关服务列表保持最新状态
  * </p>
  */
 @Service
@@ -93,6 +94,7 @@ public class GameGatewayService implements ApplicationListener<HeartbeatEvent> {
         });
         // 打乱顺序，让游戏服务器网关分布更均匀
         Collections.shuffle(initGameGatewayInfoList);
+        initGameGatewayInfoList.forEach(i -> logger.debug(i.toString()));
         // 更新网关服务信息列表
         this.gameGatewayInfoList = initGameGatewayInfoList;
     }
@@ -136,5 +138,22 @@ public class GameGatewayService implements ApplicationListener<HeartbeatEvent> {
         int gatewayCount = temGameGatewayInfoList.size();
         int index = hashCode % gatewayCount;
         return temGameGatewayInfoList.get(index);
+    }
+
+    /**
+     * 向客户端提供可以使用的游戏网关信息
+     */
+    public GameGatewayInfo getGameGatewayInfo(Long playerId) throws ExecutionException {
+        GameGatewayInfo gameGatewayInfo = userGameGatewayCache.get(playerId);
+        if (gameGatewayInfo != null) {
+            List<GameGatewayInfo> gameGatewayInfos = this.gameGatewayInfoList;
+            // 检测缓存的网关是否还有效，如果已被移除，从缓存中删除，并重新分配一个游戏网关信息
+            if (!gameGatewayInfos.contains(gameGatewayInfo)) {
+                userGameGatewayCache.invalidate(playerId);
+                // 这时，缓存中已不存在playerId对应的值，会重新初始化
+                gameGatewayInfo = userGameGatewayCache.get(playerId);
+            }
+        }
+        return gameGatewayInfo;
     }
 }

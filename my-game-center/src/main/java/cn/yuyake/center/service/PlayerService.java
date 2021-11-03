@@ -1,8 +1,10 @@
 package cn.yuyake.center.service;
 
 import cn.yuyake.common.error.GameErrorException;
+import cn.yuyake.common.utils.JWTUtil;
 import cn.yuyake.db.entity.Player;
 import cn.yuyake.error.GameCenterError;
+import cn.yuyake.http.request.SelectGameGatewayParam;
 import cn.yuyake.redis.EnumRedisKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,5 +62,14 @@ public class PlayerService {
     private long nextPlayerId(String zoneId) {
         String key = EnumRedisKey.PLAYER_ID_INCR.getKey(zoneId);
         return redisTemplate.opsForValue().increment(key);
+    }
+
+    public String createToken(SelectGameGatewayParam param) {
+        String openId = param.getOpenId();
+        String zoneId = param.getZoneId();
+        long userId = param.getUserId();
+        long playerId = param.getPlayerId();
+        String token = JWTUtil.getUserToken(openId, userId, playerId, zoneId);
+        return token;
     }
 }
