@@ -15,9 +15,9 @@ spring:
         register: true # 将游戏服务网关作为服务节点，注册到 Consul 上面
         service-name: game-gateway # 注册到 Consul 上面的服务名称，用于区分此服务是否为游戏服务器网关
         health-check-critical-timeout: 30s
-        tags:
-        - gamePort=${game.gateway.server.config.port} # 自定义数据，游戏服务器网关的长连接端口
-        - weight=3 # 游戏服务器网关权重
+        metadata:
+          gamePort: ${game.gateway.server.config.port} # 自定义数据，游戏服务器网关的长连接端口
+          weight: 3 # 游戏服务器网关权重
 game:
   gateway:
     server:

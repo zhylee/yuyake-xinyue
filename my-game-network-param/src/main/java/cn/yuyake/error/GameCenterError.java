@@ -14,6 +14,7 @@ public enum GameCenterError implements IServerError {
     NICKNAME_IS_EMPTY(6, "昵称为空"),
     NICKNAME_LEN_ERROR(7, "昵称长度不对"),
     TOKEN_FAILED(8,"token错误"),
+    NO_GAME_GATEWAY_INFO(9,"没有网关信息，无法连接游戏"),
     ;
 
     private final int errorCode;
