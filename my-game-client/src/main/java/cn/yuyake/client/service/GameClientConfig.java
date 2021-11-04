@@ -18,6 +18,10 @@ public class GameClientConfig {
     private boolean useGameCenter;
     // 游戏服务中心地址，默认是：http://localhost:5003，可以配置为网关的地址
     private String gameCenterUrl = "http://localhost:5003";
+    // 消息需要压缩的大小，如果消息包大于这个值，则需要对消息进压缩
+    private int messageCompressSize = 1024 * 2;
+    // 客户端版本
+    private int version;
 
     // 网关认证需要的token
     private String gatewayToken;
@@ -72,6 +76,21 @@ public class GameClientConfig {
         this.gameCenterUrl = gameCenterUrl;
     }
 
+    public int getMessageCompressSize() {
+        return messageCompressSize;
+    }
+
+    public void setMessageCompressSize(int messageCompressSize) {
+        this.messageCompressSize = messageCompressSize;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
     public String getGatewayToken() {
         return gatewayToken;
