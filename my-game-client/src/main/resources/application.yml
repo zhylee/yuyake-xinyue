@@ -1,0 +1,9 @@
+logging:
+  config: classpath:log4j2.xml
+spring:
+  application:
+    name: game-client
+  cloud:
+    consul:
+      discovery:
+        enabled: false # 测试客户端不作为一个 spring cloud 中的一个服务被发现，所以它不用连接 consul，获取服务实例列表
