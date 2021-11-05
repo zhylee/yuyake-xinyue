@@ -1,5 +1,4 @@
 dependencies {
     implementation project(":my-game-network-param")
-    implementation "org.springframework.boot:spring-boot-starter-webflux"
     implementation "org.springframework.shell:spring-shell-starter"
 }
