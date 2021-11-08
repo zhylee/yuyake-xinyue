@@ -1,6 +1,7 @@
 package cn.yuyake.client.service;
 
 import cn.yuyake.client.service.handler.DispatchGameMessageHandler;
+import cn.yuyake.client.service.handler.TestGameMessageHandler;
 import cn.yuyake.client.service.handler.codec.DecodeHandler;
 import cn.yuyake.client.service.handler.codec.EncodeHandler;
 import cn.yuyake.client.service.handler.codec.ResponseHandler;
@@ -52,7 +53,9 @@ public class GameClientBoot {
                         // 将响应消息转化为对应的响应对象
                         ch.pipeline().addLast("responseHandler", new ResponseHandler(gameMessageService));
                         // 添加逻辑处理
-                        ch.pipeline().addLast(new DispatchGameMessageHandler(dispatchGameMessageService));
+                        // ch.pipeline().addLast(new DispatchGameMessageHandler(dispatchGameMessageService));
+                        // 测试 Handler
+                        ch.pipeline().addLast(new TestGameMessageHandler());
                     }
                 });
         ChannelFuture future = bootstrap.connect(gameClientConfig.getDefaultGameGatewayHost(),

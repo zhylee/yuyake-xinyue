@@ -1,35 +1,30 @@
 package cn.yuyake.game.message;
 
-import cn.yuyake.game.common.GameMessageHeader;
-import cn.yuyake.game.common.IGameMessage;
+import cn.yuyake.game.common.AbstractGameMessage;
+import cn.yuyake.game.common.EnumMessageType;
+import cn.yuyake.game.common.GameMessageMetadata;
 
-public class FirstMsgRequest implements IGameMessage {
+@GameMessageMetadata(messageId = 10001, serviceId = 1, messageType = EnumMessageType.REQUEST) // 添加元数据信息
+public class FirstMsgRequest extends AbstractGameMessage {
+
     private String value;
-    private GameMessageHeader header;
-    private byte[] body;
 
     @Override
-    public GameMessageHeader getHeader() {
-        return header;
+    protected byte[] encode() {
+        // 序列化消息，这里不用判断 null，父类上面已判断过
+        return value.getBytes();
     }
 
     @Override
-    public void setHeader(GameMessageHeader header) {
-        this.header = header;
+    protected void decode(byte[] body) {
+        // 反序列化消息，这里不用判断 null，父类上面已判断过
+        value = new String(body);
     }
 
     @Override
-    public void read(byte[] body) {
-        this.body = body;
-        if (body != null) {
-            // 如果不为null，才反序列化，这样不用考虑为null的情况，防止忘记判断。
-            value = new String(body);
-        }
-    }
-
-    @Override
-    public byte[] body() {
-        return body;
+    protected boolean isBodyMsgNull() {
+        // 返回要序列化的消息体是否为 null
+        return this.value == null;
     }
 
     public String getValue() {
