@@ -1,5 +1,6 @@
 package cn.yuyake.gateway.server;
 
+import cn.yuyake.game.GameMessageService;
 import cn.yuyake.gateway.server.handler.TestGameMessageHandler;
 import cn.yuyake.gateway.server.handler.codec.DecodeHandler;
 import cn.yuyake.gateway.server.handler.codec.EncodeHandler;
@@ -19,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 public class GatewayServerBoot {
     @Autowired // 注入网关服务配置
     private GatewayServerConfig serverConfig;
+    @Autowired
+    private GameMessageService gameMessageService;
 
     private Logger logger = LoggerFactory.getLogger(GatewayServerBoot.class);
     private NioEventLoopGroup bossGroup = null;
@@ -68,7 +71,7 @@ public class GatewayServerBoot {
                 // 添加解码
                 p.addLast("DecodeHandler", new DecodeHandler());
                 // 添加业务实现
-                p.addLast(new TestGameMessageHandler());
+                p.addLast(new TestGameMessageHandler(gameMessageService));
             }
         };
         return channelInitializer;

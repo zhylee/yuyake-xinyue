@@ -1,5 +1,6 @@
 package cn.yuyake.gateway.server.handler;
 
+import cn.yuyake.game.GameMessageService;
 import cn.yuyake.game.common.GameMessagePackage;
 import cn.yuyake.game.message.FirstMsgRequest;
 import cn.yuyake.game.message.FirstMsgResponse;
@@ -13,7 +14,12 @@ import org.slf4j.LoggerFactory;
  */
 public class TestGameMessageHandler extends ChannelInboundHandlerAdapter {
 
-    private Logger logger = LoggerFactory.getLogger(TestGameMessageHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(TestGameMessageHandler.class);
+    private final GameMessageService messageService;
+
+    public TestGameMessageHandler(GameMessageService messageService) {
+        this.messageService = messageService;
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -22,10 +28,12 @@ public class TestGameMessageHandler extends ChannelInboundHandlerAdapter {
         // 根据消息号处理不同的请求业务
         if (messageId == 10001) {
             FirstMsgRequest request = new FirstMsgRequest();
+            // 读取消息体
             request.read(gameMessagePackage.getBody());
             logger.debug("接收到客户端消息：{}", request.getValue());
             FirstMsgResponse response = new FirstMsgResponse();
             response.setServerTime(System.currentTimeMillis());
+            // 给客户端回消息
             GameMessagePackage returnPackage = new GameMessagePackage();
             returnPackage.setHeader(response.getHeader());
             returnPackage.setBody(response.body());

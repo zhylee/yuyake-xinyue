@@ -1,7 +1,7 @@
 logging:
   config: classpath:log4j2.xml
 server:
-  port: ${game.gateway.server.config.port}
+  port: 6002
 spring:
   application:
     name: game-gateway-001
@@ -23,3 +23,5 @@ game:
     server:
       config:
         port: 6003 # 游戏服务器网关的长连接端口，这里的数据是自定义配置
+        boss-thread-count: 1
+        work-thread-count: 4
