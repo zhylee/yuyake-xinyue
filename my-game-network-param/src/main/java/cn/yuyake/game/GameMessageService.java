@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-// TODO Game Message Service
 @Service
 public class GameMessageService {
     private final Logger logger = LoggerFactory.getLogger(GameMessageService.class);

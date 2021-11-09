@@ -3,6 +3,9 @@ package cn.yuyake.client.command;
 import cn.yuyake.client.service.GameClientBoot;
 import cn.yuyake.client.service.GameClientConfig;
 import cn.yuyake.game.message.FirstMsgRequest;
+import cn.yuyake.game.message.SecondMsgRequest;
+import cn.yuyake.game.message.ThirdMsgRequest;
+import cn.yuyake.game.message.body.ThirdMsgBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +36,7 @@ public class GameClientCommand {
         // 如果默认的 host 不为空，说明是连接指定的 host
         // 如果没有指定 host，使用配置中的默认 host 和端口
         if (!host.isEmpty()) {
-            if(port == 0) {
+            if (port == 0) {
                 logger.error("请输入服务器端口号");
                 return;
             }
@@ -46,11 +49,27 @@ public class GameClientCommand {
 
     @ShellMethod("发送测试消息，格式：send-test-msg 消息号")
     public void sendTestMsg(int messageId) {
-        if(messageId == 10001) {
+        if (messageId == 10001) {
             // 向服务器发送一条消息
             FirstMsgRequest request = new FirstMsgRequest();
             request.setValue("Hello, server !!");
             request.getHeader().setClientSendTime(System.currentTimeMillis());
+            gameClientBoot.getChannel().writeAndFlush(request);
+        }
+        if (messageId == 10002) {
+            SecondMsgRequest request = new SecondMsgRequest();
+            request.getBodyObj().setValue1("你好，这是测试请求");
+            request.getBodyObj().setValue2(System.currentTimeMillis());
+            gameClientBoot.getChannel().writeAndFlush(request);
+        }
+        if (messageId == 10003) {
+            ThirdMsgRequest request = new ThirdMsgRequest();
+            ThirdMsgBody.ThirdMsgRequestBody requestBody = ThirdMsgBody.ThirdMsgRequestBody
+                    .newBuilder()
+                    .setValue1("我是Protocol Buffer序列化的")
+                    .setValue2(System.currentTimeMillis())
+                    .build();
+            request.setRequestBody(requestBody);
             gameClientBoot.getChannel().writeAndFlush(request);
         }
     }

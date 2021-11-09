@@ -1,6 +1,8 @@
 package cn.yuyake.client.service.handler;
 
 import cn.yuyake.game.message.FirstMsgResponse;
+import cn.yuyake.game.message.SecondMsgResponse;
+import cn.yuyake.game.message.ThirdMsgResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
@@ -14,7 +16,15 @@ public class TestGameMessageHandler extends ChannelInboundHandlerAdapter {
         // 判断消息类型
         if (msg instanceof FirstMsgResponse) {
             FirstMsgResponse response = (FirstMsgResponse) msg;
-            logger.info("收到服务器响应：{}", response.getServerTime());
+            logger.info("first msg response: {}", response.getServerTime());
+        }
+        if (msg instanceof SecondMsgResponse) {
+            SecondMsgResponse response = (SecondMsgResponse) msg;
+            logger.info("second msg response: {}", response.getBodyObj().getResult1());
+        }
+        if(msg instanceof ThirdMsgResponse) {
+            ThirdMsgResponse response = (ThirdMsgResponse)msg;
+            logger.info("third msg response: {}",response.getResponseBody().getValue1());
         }
     }
 }

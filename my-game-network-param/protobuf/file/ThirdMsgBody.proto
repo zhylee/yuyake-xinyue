@@ -1,0 +1,16 @@
+syntax = "proto2";
+option java_package = "cn.yuyake.game.message.body"; // 包名
+option java_outer_classname = "ThirdMsgBody"; // 源文件类名
+
+// 请求消息消息体
+message ThirdMsgRequestBody {
+    optional string value1 = 1;
+    optional int64 value2 = 2;
+}
+
+// 响应消息消息体
+message ThirdMsgResponseBody {
+    optional string value1 = 1;
+    optional int32 value2 = 2;
+    optional string value3 = 3;
+}
