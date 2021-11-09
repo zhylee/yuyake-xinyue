@@ -53,9 +53,9 @@ public class GameClientBoot {
                         // 将响应消息转化为对应的响应对象
                         ch.pipeline().addLast("responseHandler", new ResponseHandler(gameMessageService));
                         // 添加逻辑处理
-                        // ch.pipeline().addLast(new DispatchGameMessageHandler(dispatchGameMessageService));
+                        ch.pipeline().addLast(new DispatchGameMessageHandler(dispatchGameMessageService));
                         // 测试 Handler
-                        ch.pipeline().addLast(new TestGameMessageHandler());
+                        // ch.pipeline().addLast(new TestGameMessageHandler());
                     }
                 });
         ChannelFuture future = bootstrap.connect(gameClientConfig.getDefaultGameGatewayHost(),

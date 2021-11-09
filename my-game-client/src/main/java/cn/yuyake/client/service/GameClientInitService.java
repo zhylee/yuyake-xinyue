@@ -2,6 +2,7 @@ package cn.yuyake.client.service;
 
 import cn.yuyake.common.utils.CommonField;
 import cn.yuyake.common.utils.GameHttpClient;
+import cn.yuyake.game.messagedispatcher.DispatchGameMessageService;
 import cn.yuyake.http.MessageCode;
 import cn.yuyake.http.request.SelectGameGatewayParam;
 import cn.yuyake.http.response.GameGatewayInfoMsg;
@@ -9,19 +10,26 @@ import cn.yuyake.http.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
+@Service
 public class GameClientInitService {
 
     private Logger logger = LoggerFactory.getLogger(GameClientInitService.class);
 
     @Autowired
     private GameClientConfig gameClientConfig;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     // 服务启动后，自动调用这个方法
     @PostConstruct
     public void init() {
+        // 扫描加载要处理的消息类型
+        DispatchGameMessageService.scanGameMessages(applicationContext, 0, "cn.yuyake");
         this.selectGateway();
     }
 
