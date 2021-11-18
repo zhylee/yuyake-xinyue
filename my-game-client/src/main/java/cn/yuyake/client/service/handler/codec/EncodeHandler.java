@@ -28,6 +28,8 @@ public class EncodeHandler extends MessageToByteEncoder<IGameMessage> {
     private final GameClientConfig gameClientConfig;
     // 对称加密的密钥
     private String aesSecretKey;
+    // 消息序列号
+    private int seqId;
 
     public EncodeHandler(GameClientConfig gameClientConfig) {
         this.gameClientConfig = gameClientConfig;
@@ -60,6 +62,7 @@ public class EncodeHandler extends MessageToByteEncoder<IGameMessage> {
         }
         GameMessageHeader header = msg.getHeader();
         out.writeInt(messageSize); // 依次写入包头数据
+        out.writeInt(++seqId);
         out.writeInt(header.getClientSeqId());
         out.writeInt(header.getMessageId());
         out.writeShort(header.getServiceId());

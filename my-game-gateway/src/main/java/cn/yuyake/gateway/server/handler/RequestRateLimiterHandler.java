@@ -1,5 +1,6 @@
 package cn.yuyake.gateway.server.handler;
 
+import cn.yuyake.game.common.GameMessagePackage;
 import com.google.common.util.concurrent.RateLimiter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -11,6 +12,8 @@ public class RequestRateLimiterHandler extends ChannelInboundHandlerAdapter {
     private RateLimiter globalRateLimiter;
     // 用户限流器，用于限制单个用户的请求
     private static RateLimiter userRateLimiter;
+    // 最后一次消息id
+    private int lastClientSeqId = 0;
     private static final Logger logger = LoggerFactory.getLogger(RequestRateLimiterHandler.class);
 
     public RequestRateLimiterHandler(RateLimiter globalRateLimiter, double requestPerSecond) {
@@ -32,6 +35,16 @@ public class RequestRateLimiterHandler extends ChannelInboundHandlerAdapter {
             ctx.close();
             return;
         }
+        // 消息幂等处理
+        GameMessagePackage gameMessagePackage = (GameMessagePackage) msg;
+        int clientSeqId = gameMessagePackage.getHeader().getClientSeqId();
+        if (lastClientSeqId > 0) {
+            if (clientSeqId <= lastClientSeqId) {
+                return;
+            }
+        }
+        // 记录本次处理的消息序列号
+        this.lastClientSeqId = clientSeqId;
         // 不要忘记添加这个，要不然后面的handler收不到消息
         ctx.fireChannelRead(msg);
     }
