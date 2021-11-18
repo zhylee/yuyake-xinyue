@@ -2,9 +2,11 @@ package cn.yuyake.gateway.server;
 
 import cn.yuyake.game.GameMessageService;
 import cn.yuyake.gateway.server.handler.ConfirmHandler;
+import cn.yuyake.gateway.server.handler.RequestRateLimiterHandler;
 import cn.yuyake.gateway.server.handler.TestGameMessageHandler;
 import cn.yuyake.gateway.server.handler.codec.DecodeHandler;
 import cn.yuyake.gateway.server.handler.codec.EncodeHandler;
+import com.google.common.util.concurrent.RateLimiter;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -25,10 +27,12 @@ public class GatewayServerBoot {
     private GameMessageService gameMessageService;
 
     private Logger logger = LoggerFactory.getLogger(GatewayServerBoot.class);
+    private RateLimiter globalRateLimiter;
     private NioEventLoopGroup bossGroup = null;
     private NioEventLoopGroup workerGroup = null;
 
     public void startServer() {
+        globalRateLimiter = RateLimiter.create(serverConfig.getGlobalRequestPerSecond());
         // bossGroup 负责监听端口，与客户端建立连接
         bossGroup = new NioEventLoopGroup(serverConfig.getBossThreadCount());
         // workGroup 用于处理网络通信之间的消息，包括编码、解码和业务逻辑（业务逻辑线程组）
@@ -73,6 +77,8 @@ public class GatewayServerBoot {
                 p.addLast("DecodeHandler", new DecodeHandler());
                 // 处理连接检测与认证
                 p.addLast("ConfirmHandler", new ConfirmHandler(serverConfig));
+                // 添加限流handler
+                p.addLast("RequestLimit", new RequestRateLimiterHandler(globalRateLimiter, serverConfig.getRequestPerSecond()));
                 // 添加业务实现
                 p.addLast(new TestGameMessageHandler(gameMessageService));
             }

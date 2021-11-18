@@ -9,8 +9,14 @@ public class GatewayServerConfig {
     private int port;
     private int bossThreadCount;
     private int workThreadCount;
-    private int compressMessageSize = 1024 * 2; // 达到压缩的消息最小大小
-    private int waitConfirmTimeoutSecond = 30; // 等待认证的超时时间
+    // 达到压缩的消息最小大小
+    private int compressMessageSize = 1024 * 2;
+    // 等待认证的超时时间
+    private int waitConfirmTimeoutSecond = 30;
+    // 全局流量限制请允许每秒请求数量
+    private double globalRequestPerSecond = 2000;
+    // 单个用户的限流请允许的每秒请求数量
+    private double requestPerSecond = 10;
 
     public int getPort() {
         return port;
@@ -50,5 +56,21 @@ public class GatewayServerConfig {
 
     public void setWaitConfirmTimeoutSecond(int waitConfirmTimeoutSecond) {
         this.waitConfirmTimeoutSecond = waitConfirmTimeoutSecond;
+    }
+
+    public double getGlobalRequestPerSecond() {
+        return globalRequestPerSecond;
+    }
+
+    public void setGlobalRequestPerSecond(double globalRequestPerSecond) {
+        this.globalRequestPerSecond = globalRequestPerSecond;
+    }
+
+    public double getRequestPerSecond() {
+        return requestPerSecond;
+    }
+
+    public void setRequestPerSecond(double requestPerSecond) {
+        this.requestPerSecond = requestPerSecond;
     }
 }
