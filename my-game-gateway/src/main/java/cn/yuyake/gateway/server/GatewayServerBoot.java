@@ -1,6 +1,7 @@
 package cn.yuyake.gateway.server;
 
 import cn.yuyake.game.GameMessageService;
+import cn.yuyake.gateway.server.handler.ConfirmHandler;
 import cn.yuyake.gateway.server.handler.TestGameMessageHandler;
 import cn.yuyake.gateway.server.handler.codec.DecodeHandler;
 import cn.yuyake.gateway.server.handler.codec.EncodeHandler;
@@ -70,6 +71,8 @@ public class GatewayServerBoot {
                 p.addLast(new LengthFieldBasedFrameDecoder(1024 * 1024, 0, 4, -4, 0));
                 // 添加解码
                 p.addLast("DecodeHandler", new DecodeHandler());
+                // 处理连接检测与认证
+                p.addLast("ConfirmHandler", new ConfirmHandler(serverConfig));
                 // 添加业务实现
                 p.addLast(new TestGameMessageHandler(gameMessageService));
             }

@@ -1,6 +1,7 @@
 package cn.yuyake.client.service.handler.codec;
 
 import cn.yuyake.client.service.GameClientConfig;
+import cn.yuyake.common.utils.AESUtils;
 import cn.yuyake.common.utils.CompressUtil;
 import cn.yuyake.game.common.GameMessageHeader;
 import cn.yuyake.game.common.IGameMessage;
@@ -25,9 +26,15 @@ public class EncodeHandler extends MessageToByteEncoder<IGameMessage> {
     // 发送消息的包头总长度
     private static final int GAME_MESSAGE_HEADER_LEN = 27;
     private final GameClientConfig gameClientConfig;
+    // 对称加密的密钥
+    private String aesSecretKey;
 
     public EncodeHandler(GameClientConfig gameClientConfig) {
         this.gameClientConfig = gameClientConfig;
+    }
+
+    public void setAesSecretKey(String aesSecretKey) {
+        this.aesSecretKey = aesSecretKey;
     }
 
     @Override
@@ -43,6 +50,10 @@ public class EncodeHandler extends MessageToByteEncoder<IGameMessage> {
                 // 包体大小达到需要压缩的值时，对包体进行压缩
                 body = CompressUtil.compress(body);
                 compress = 1;
+            }
+            if(this.aesSecretKey != null && msg.getHeader().getMessageId() != 1) {
+                //密钥不为空，对消息体加密
+                body = AESUtils.encode(aesSecretKey, body);
             }
             // 加上包体的长度，得到数据包的总大小
             messageSize += body.length;

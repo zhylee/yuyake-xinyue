@@ -1,5 +1,14 @@
 package cn.yuyake.game.messagedispatcher;
 
-// TODO Game Channel Context
+import cn.yuyake.game.common.IGameMessage;
+
 public interface IGameChannelContext {
+
+    void sendMessage(IGameMessage gameMessage);
+
+    <T> T getRequest();
+
+    String getRemoteHost();
+
+    long getPlayerId();
 }

@@ -6,11 +6,10 @@ import cn.yuyake.center.service.PlayerService;
 import cn.yuyake.center.service.UserLoginService;
 import cn.yuyake.common.error.GameErrorException;
 import cn.yuyake.common.error.IServerError;
-import cn.yuyake.common.error.TokenException;
 import cn.yuyake.common.utils.JWTUtil;
+import cn.yuyake.common.utils.RSAUtils;
 import cn.yuyake.db.entity.Player;
 import cn.yuyake.db.entity.UserAccount;
-import cn.yuyake.error.GameCenterError;
 import cn.yuyake.http.MessageCode;
 import cn.yuyake.http.request.CreatePlayerParam;
 import cn.yuyake.http.request.LoginParam;
@@ -21,13 +20,14 @@ import cn.yuyake.http.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
 @RestController // RestController = Controller + ResponseBody
 @RequestMapping("/request")
@@ -92,14 +92,26 @@ public class UserController {
     }
 
     @PostMapping(MessageCode.SELECT_GAME_GATEWAY)
-    public ResponseEntity<GameGatewayInfoMsg> selectGameGateway(@RequestBody SelectGameGatewayParam param) throws ExecutionException {
+    public ResponseEntity<GameGatewayInfoMsg> selectGameGateway(@RequestBody SelectGameGatewayParam param) throws Exception {
+        param.checkParam();
         long playerId = param.getPlayerId();
         GameGatewayInfo gameGatewayInfo = gameGatewayService.getGameGatewayInfo(playerId);
-        logger.debug("player {} 获取游戏服务器网关信息成功：{}", playerId, gameGatewayInfo);
         GameGatewayInfoMsg gameGatewayInfoMsg = new GameGatewayInfoMsg(gameGatewayInfo.getId(),
                 gameGatewayInfo.getIp(), gameGatewayInfo.getPort());
-        String token = playerService.createToken(param);
+        // 生成 RSA 的公钥
+        Map<String, Object> keyPair = RSAUtils.genKeyPair();
+        // 获取公钥
+        byte[] publicKeyBytes = RSAUtils.getPublicKey(keyPair);
+        // 为了方便传输，对 bytes 数组进行一下 base64 编码
+        String publicKey = Base64Utils.encodeToString(publicKeyBytes);
+        // 根据这些参数生成 token
+        String token = playerService.createToken(param, gameGatewayInfo.getIp(), publicKey);
         gameGatewayInfoMsg.setToken(token);
+        byte[] privateKeyBytes = RSAUtils.getPrivateKey(keyPair);
+        String privateKey = Base64Utils.encodeToString(privateKeyBytes);
+        // 给客户端返回私钥
+        gameGatewayInfoMsg.setRsaPrivateKey(privateKey);
+        logger.debug("player {} 获取游戏服务器网关信息成功：{}", playerId, gameGatewayInfoMsg);
         ResponseEntity<GameGatewayInfoMsg> responseEntity = new ResponseEntity<>(gameGatewayInfoMsg);
         return responseEntity;
     }

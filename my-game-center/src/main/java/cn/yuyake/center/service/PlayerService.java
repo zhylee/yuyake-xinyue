@@ -30,7 +30,7 @@ public class PlayerService {
     }
 
     // 统一生成 redis 存储的 key
-    private String getNickNameRedisKey(String zoneId,String nickName) {
+    private String getNickNameRedisKey(String zoneId, String nickName) {
         return EnumRedisKey.PLAYER_NICKNAME.getKey(zoneId + "_" + nickName);
     }
 
@@ -64,12 +64,12 @@ public class PlayerService {
         return redisTemplate.opsForValue().increment(key);
     }
 
-    public String createToken(SelectGameGatewayParam param) {
+    public String createToken(SelectGameGatewayParam param, String gatewayIp, String publicKey) {
         String openId = param.getOpenId();
         String zoneId = param.getZoneId();
         long userId = param.getUserId();
         long playerId = param.getPlayerId();
-        String token = JWTUtil.getUserToken(openId, userId, playerId, zoneId);
+        String token = JWTUtil.getUserToken(openId, userId, playerId, zoneId, gatewayIp, publicKey);
         return token;
     }
 }

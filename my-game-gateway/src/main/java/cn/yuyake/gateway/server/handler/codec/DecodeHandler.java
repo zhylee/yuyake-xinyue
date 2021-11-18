@@ -1,5 +1,6 @@
 package cn.yuyake.gateway.server.handler.codec;
 
+import cn.yuyake.common.utils.AESUtils;
 import cn.yuyake.common.utils.CompressUtil;
 import cn.yuyake.game.common.GameMessageHeader;
 import cn.yuyake.game.common.GameMessagePackage;
@@ -27,6 +28,12 @@ import java.io.IOException;
  * </p>
  */
 public class DecodeHandler extends ChannelInboundHandlerAdapter {
+    // 对称加密密钥
+    private String aesSecret;
+
+    public void setAesSecret(String aesSecret) {
+        this.aesSecret = aesSecret;
+    }
 
     private final static Logger logger = LoggerFactory.getLogger(DecodeHandler.class);
 
@@ -52,6 +59,10 @@ public class DecodeHandler extends ChannelInboundHandlerAdapter {
             if (byteBuf.readableBytes() > 0) {
                 body = new byte[byteBuf.readableBytes()];
                 byteBuf.readBytes(body);
+                // 如果密钥不为空，且不是认证消息，对消息体解密
+                if (this.aesSecret != null && messageId != 1) {
+                    body = AESUtils.decode(aesSecret, body);
+                }
                 if (compress == 1) {
                     // 如果压缩过，进行解压
                     body = CompressUtil.decompress(body);

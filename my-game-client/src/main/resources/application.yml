@@ -12,5 +12,5 @@ spring:
 game:
   client:
     config:
-      use-game-center: false
+      use-game-center: true
       game-center-url: http://192.168.110.48:5001/game-center-server

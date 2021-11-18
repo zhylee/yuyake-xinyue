@@ -1,5 +1,6 @@
 package cn.yuyake.gateway.server.handler.codec;
 
+import cn.yuyake.common.utils.AESUtils;
 import cn.yuyake.common.utils.CompressUtil;
 import cn.yuyake.game.common.GameMessageHeader;
 import cn.yuyake.game.common.GameMessagePackage;
@@ -14,10 +15,16 @@ import io.netty.handler.codec.MessageToByteEncoder;
 public class EncodeHandler extends MessageToByteEncoder<GameMessagePackage> {
     private static final int GAME_MESSAGE_HEADER_LEN = 29;
     private final GatewayServerConfig serverConfig;
+    // 对称加密密钥
+    private String aesSecret;
 
     public EncodeHandler(GatewayServerConfig serverConfig) {
         // 注入服务端配置
         this.serverConfig = serverConfig;
+    }
+
+    public void setAesSecret(String aesSecret) {
+        this.aesSecret = aesSecret;
     }
     @Override
     protected void encode(ChannelHandlerContext ctx, GameMessagePackage msg, ByteBuf out) throws Exception {
@@ -29,6 +36,9 @@ public class EncodeHandler extends MessageToByteEncoder<GameMessagePackage> {
                 // 达到压缩条件，进行压缩
                 body = CompressUtil.compress(body);
                 compress = 1;
+            }
+            if (this.aesSecret != null && msg.getHeader().getMessageId() != 1) {
+                body = AESUtils.encode(aesSecret, body);
             }
             messageSize += body.length;
         }
