@@ -2,6 +2,7 @@ package cn.yuyake.gateway.server;
 
 import cn.yuyake.game.GameMessageService;
 import cn.yuyake.gateway.server.handler.ConfirmHandler;
+import cn.yuyake.gateway.server.handler.HeartbeatHandler;
 import cn.yuyake.gateway.server.handler.RequestRateLimiterHandler;
 import cn.yuyake.gateway.server.handler.TestGameMessageHandler;
 import cn.yuyake.gateway.server.handler.codec.DecodeHandler;
@@ -12,6 +13,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +83,13 @@ public class GatewayServerBoot {
                 p.addLast("ConfirmHandler", new ConfirmHandler(serverConfig, channelService));
                 // 添加限流handler
                 p.addLast("RequestLimit", new RequestRateLimiterHandler(globalRateLimiter, serverConfig.getRequestPerSecond()));
+                // 触发心跳的handler
+                int readerIdleTimeSeconds = serverConfig.getReaderIdleTimeSeconds();
+                int writerIdleTimeSeconds = serverConfig.getWriterIdleTimeSeconds();
+                int allIdleTimeSeconds = serverConfig.getAllIdleTimeSeconds();
+                p.addLast(new IdleStateHandler(readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds));
+                // 处理心跳的handler
+                p.addLast("HeartbeatHandler", new HeartbeatHandler());
                 // 添加业务实现
                 p.addLast(new TestGameMessageHandler(gameMessageService));
             }

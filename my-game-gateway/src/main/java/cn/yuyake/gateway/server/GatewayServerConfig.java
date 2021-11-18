@@ -17,6 +17,12 @@ public class GatewayServerConfig {
     private double globalRequestPerSecond = 2000;
     // 单个用户的限流请允许的每秒请求数量
     private double requestPerSecond = 10;
+    // channel读取空闲时间
+    private int readerIdleTimeSeconds = 300;
+    // channel写出空闲时间
+    private int writerIdleTimeSeconds = 12;
+    // channel读写空闲时间
+    private int allIdleTimeSeconds = 15;
 
     public int getPort() {
         return port;
@@ -72,5 +78,29 @@ public class GatewayServerConfig {
 
     public void setRequestPerSecond(double requestPerSecond) {
         this.requestPerSecond = requestPerSecond;
+    }
+
+    public int getReaderIdleTimeSeconds() {
+        return readerIdleTimeSeconds;
+    }
+
+    public void setReaderIdleTimeSeconds(int readerIdleTimeSeconds) {
+        this.readerIdleTimeSeconds = readerIdleTimeSeconds;
+    }
+
+    public int getWriterIdleTimeSeconds() {
+        return writerIdleTimeSeconds;
+    }
+
+    public void setWriterIdleTimeSeconds(int writerIdleTimeSeconds) {
+        this.writerIdleTimeSeconds = writerIdleTimeSeconds;
+    }
+
+    public int getAllIdleTimeSeconds() {
+        return allIdleTimeSeconds;
+    }
+
+    public void setAllIdleTimeSeconds(int allIdleTimeSeconds) {
+        this.allIdleTimeSeconds = allIdleTimeSeconds;
     }
 }

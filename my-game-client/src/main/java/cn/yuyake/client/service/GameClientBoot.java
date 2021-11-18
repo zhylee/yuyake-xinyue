@@ -1,7 +1,7 @@
 package cn.yuyake.client.service;
 
 import cn.yuyake.client.service.handler.DispatchGameMessageHandler;
-import cn.yuyake.client.service.handler.TestGameMessageHandler;
+import cn.yuyake.client.service.handler.HeartbeatHandler;
 import cn.yuyake.client.service.handler.codec.DecodeHandler;
 import cn.yuyake.client.service.handler.codec.EncodeHandler;
 import cn.yuyake.client.service.handler.codec.ResponseHandler;
@@ -12,6 +12,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,10 @@ public class GameClientBoot {
                         ch.pipeline().addLast("DecodeHandler", new DecodeHandler());
                         // 将响应消息转化为对应的响应对象
                         ch.pipeline().addLast("responseHandler", new ResponseHandler(gameMessageService));
+                        // 如果6秒之内没有消息写出，发送写出空闲事件，触发心跳
+                        ch.pipeline().addLast(new IdleStateHandler(15, 6, 20));
+                        // 心跳 Handler
+                        ch.pipeline().addLast("HeartbeatHandler", new HeartbeatHandler());
                         // 添加逻辑处理
                         ch.pipeline().addLast(new DispatchGameMessageHandler(dispatchGameMessageService));
                         // 测试 Handler
