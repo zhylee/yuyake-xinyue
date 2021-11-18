@@ -4,6 +4,7 @@ import cn.yuyake.common.error.IServerError;
 
 public enum GameGatewayError implements IServerError {
     TOKEN_EXPIRE(102, "TOKEN已过期"),
+    REPEATED_CONNECT(103,"重复连接，可能异地登陆了"),
     ;
     private final int errorCode;
     private final String errorDesc;

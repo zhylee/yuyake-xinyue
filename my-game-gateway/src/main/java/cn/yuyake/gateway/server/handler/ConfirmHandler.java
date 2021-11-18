@@ -8,11 +8,13 @@ import cn.yuyake.error.GameGatewayError;
 import cn.yuyake.game.common.GameMessagePackage;
 import cn.yuyake.game.message.ConfirmMsgRequest;
 import cn.yuyake.game.message.ConfirmMsgResponse;
+import cn.yuyake.gateway.server.ChannelService;
 import cn.yuyake.gateway.server.GatewayServerConfig;
 import cn.yuyake.gateway.server.handler.codec.DecodeHandler;
 import cn.yuyake.gateway.server.handler.codec.EncodeHandler;
 import cn.yuyake.message.GatewayMessageCode;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
@@ -37,9 +39,12 @@ public class ConfirmHandler extends ChannelInboundHandlerAdapter {
     private ScheduledFuture<?> future;
     // token body
     private TokenBody tokenBody;
+    // Channel Service
+    private ChannelService channelService;
 
-    public ConfirmHandler(GatewayServerConfig serverConfig) {
+    public ConfirmHandler(GatewayServerConfig serverConfig, ChannelService channelService) {
         this.serverConfig = serverConfig;
+        this.channelService = channelService;
     }
 
     /**
@@ -63,8 +68,30 @@ public class ConfirmHandler extends ChannelInboundHandlerAdapter {
         if (future != null) {
             // 如果连接关闭了，取消定时检测任务
             future.cancel(true);
-            // 接下来告诉下面的 Handler
-            ctx.fireChannelInactive();
+        }
+        if (tokenBody != null) {
+            // 连接断开后，移除连接
+            long playerId = tokenBody.getPlayerId();
+            // 调用移除，否则出现内存泄漏的问题
+            this.channelService.removeChannel(playerId, ctx.channel());
+        }
+        // 接下来告诉下面的 Handler
+        ctx.fireChannelInactive();
+    }
+
+    private void repeatedConnect() {
+        if (tokenBody != null) {
+            Channel existChannel = this.channelService.getChannel(tokenBody.getPlayerId());
+            if (existChannel != null) {
+                // 如果检测到同一个帐号创建了多个连接，则把旧连接关闭，保留新连接
+                ConfirmMsgResponse response = new ConfirmMsgResponse();
+                response.getHeader().setErrorCode(GameGatewayError.REPEATED_CONNECT.getErrorCode());
+                GameMessagePackage returnPackage = new GameMessagePackage();
+                returnPackage.setHeader(response.getHeader());
+                returnPackage.setBody(response.body());
+                // 在关闭之后，给这个连接返回一条提示信息，告诉客户帐号可能异地登录了
+                existChannel.close();
+            }
         }
     }
 
@@ -86,6 +113,10 @@ public class ConfirmHandler extends ChannelInboundHandlerAdapter {
                     tokenBody = JWTUtil.getTokenBody(token);
                     // 标记认证成功
                     this.confirmSuccess = true;
+                    // 检测重复连接
+                    this.repeatedConnect();
+                    // 加入连接管理
+                    channelService.addChannel(tokenBody.getPlayerId(), ctx.channel());
                     // 生成此连接的AES秘钥
                     String aesSecretKey = AESUtils.createSecret(tokenBody.getUserId(), tokenBody.getServerId());
                     // 将对称加密密钥分别设置到编码和解码的 Handler 中

@@ -25,6 +25,8 @@ public class GatewayServerBoot {
     private GatewayServerConfig serverConfig;
     @Autowired
     private GameMessageService gameMessageService;
+    @Autowired
+    private ChannelService channelService;
 
     private Logger logger = LoggerFactory.getLogger(GatewayServerBoot.class);
     private RateLimiter globalRateLimiter;
@@ -76,7 +78,7 @@ public class GatewayServerBoot {
                 // 添加解码
                 p.addLast("DecodeHandler", new DecodeHandler());
                 // 处理连接检测与认证
-                p.addLast("ConfirmHandler", new ConfirmHandler(serverConfig));
+                p.addLast("ConfirmHandler", new ConfirmHandler(serverConfig, channelService));
                 // 添加限流handler
                 p.addLast("RequestLimit", new RequestRateLimiterHandler(globalRateLimiter, serverConfig.getRequestPerSecond()));
                 // 添加业务实现
