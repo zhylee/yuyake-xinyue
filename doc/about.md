@@ -72,3 +72,48 @@ C:\Users\admin\Downloads\mkcert-v1.4.3-windows-amd64.exe -install -pkcs12 my-gam
 
 - [使用mkcert生成本地安全的SSL证书](https://www.jianshu.com/p/5064fef8c577)
 
+## Zookeeper && Kafka
+
+```
+cd /data/soft
+wget https://dlcdn.apache.org/zookeeper/zookeeper-3.5.9/apache-zookeeper-3.5.9-bin.tar.gz
+tar -zxvf apache-zookeeper-3.5.9-bin.tar.gz
+cd apache-zookeeper-3.5.9-bin/conf
+mv zoo_sample.cfg  zoo.cfg
+cd ..
+bin/zkServer.sh start
+
+cd /data/soft
+wget https://archive.apache.org/dist/kafka/2.7.1/kafka_2.12-2.7.1.tgz
+tar -zxvf kafka_2.12-2.7.1.tgz
+cd kafka_2.12-2.7.1
+
+vim config/server.properties
+listeners=PLAINTEXT://0.0.0.0:9092
+advertised.listeners=PLAINTEXT://192.168.63.131:9092
+
+bin/kafka-server-start.sh -daemon config/server.properties
+
+firewall-cmd --query-port=9092/tcp
+# 如果是no，需要把端口开了
+firewall-cmd --add-port=9092/tcp --permanent
+firewall-cmd --reload
+
+wget https://github.com/yahoo/CMAK/archive/refs/tags/3.0.0.5.tar.gz
+tar -zxvf 3.0.0.5.tar.gz
+cd CMAK-3.0.0.5
+./sbt clean dist
+cd ..
+unzip CMAK-3.0.0.5/target/universal/cmak-3.0.0.5.zip
+cd cmak-3.0.0.5
+vim conf/application.conf
+cmak.zkhosts="192.168.63.131:2181"
+
+firewall-cmd --query-port=9000/tcp
+# 如果是no，需要把端口开了
+firewall-cmd --add-port=9000/tcp --permanent
+firewall-cmd --reload
+
+cd bin
+./cmak &
+```

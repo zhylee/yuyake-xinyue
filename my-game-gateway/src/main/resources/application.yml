@@ -18,6 +18,21 @@ spring:
         metadata:
           gamePort: ${game.gateway.server.config.port} # 自定义数据，游戏服务器网关的长连接端口
           weight: 3 # 游戏服务器网关权重
+    bus:
+      enabled: true # 开启消息总线服务
+    stream:
+      kafka:
+        binder:
+          brokers: 192.168.63.131:9092 # 配置 Kafka 地址
+  kafka:
+    producer:
+      bootstrap-servers: 192.168.63.131:9092
+      key-serializer:
+        org.apache.kafka.common.serialization.StringSerializer  # 指定生产者的Key的序列化方式
+    bootstrap-servers: 192.168.63.131:9092
+
+
+
 game:
   gateway:
     server:

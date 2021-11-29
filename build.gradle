@@ -75,7 +75,7 @@ subprojects {
         // 引入 Consul 客户端，用于服务发现
         implementation 'org.springframework.cloud:spring-cloud-starter-consul-discovery'
         // 引用 Spring Cloud Bus 依赖的消息队列，Kafka
-        // implementation 'org.springframework.cloud:spring-cloud-starter-bus-kafka'
+        implementation 'org.springframework.cloud:spring-cloud-starter-bus-kafka'
     }
 
     test {
