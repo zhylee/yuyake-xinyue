@@ -9,6 +9,10 @@ public class GameMessageHeader implements Cloneable {
     private long serverSendTime;
     private int version;
     private int errorCode;
+    private int fromServerId;
+    private int toServerId;
+    private long playerId;
+    private HeaderAttribute attribute = new HeaderAttribute();
 
     @Override
     public GameMessageHeader clone() throws CloneNotSupportedException {
@@ -78,5 +82,37 @@ public class GameMessageHeader implements Cloneable {
 
     public void setErrorCode(int errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public int getFromServerId() {
+        return fromServerId;
+    }
+
+    public void setFromServerId(int fromServerId) {
+        this.fromServerId = fromServerId;
+    }
+
+    public int getToServerId() {
+        return toServerId;
+    }
+
+    public void setToServerId(int toServerId) {
+        this.toServerId = toServerId;
+    }
+
+    public long getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(long playerId) {
+        this.playerId = playerId;
+    }
+
+    public HeaderAttribute getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(HeaderAttribute attribute) {
+        this.attribute = attribute;
     }
 }
