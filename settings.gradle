@@ -6,4 +6,5 @@ include 'my-game-dao'
 include 'my-game-web-gateway'
 include 'my-game-gateway'
 include 'my-game-client'
+include 'my-game-xinyue'
 

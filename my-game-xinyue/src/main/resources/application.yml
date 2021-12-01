@@ -1,0 +1,37 @@
+logging:
+  config: classpath:log4j2.xml
+server:
+  port: 7001
+spring:
+  application:
+    name: game-xinyue
+  cloud:
+    consul:
+      host: 192.168.63.131
+      port: 8500
+      discovery:
+        prefer-ip-address: true
+        ip-address: 192.168.110.48
+        register: true
+        service-name: game-logic # 注册到consul上面的服务名称，用于区分此服务是否为游戏逻辑
+        health-check-critical-timeout: 30s # 如果健康检测失败，30s之后从注册服务删除
+        metadata:
+          serviceId: ${game.server.config.service-id} # 服务的serviceId，用于获取一组服务
+          serverId: ${game.server.config.server-id} # 服务的serverId，用于定位某一个具体的服务
+          weight: 3 # 服务器负载权重
+    stream:
+      kafka:
+        binder:
+          brokers: 192.168.63.131:9092 # 配置 Kafka 地址
+  kafka:
+    producer:
+      bootstrap-servers: 192.168.63.131:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer  # 指定生产者的Key的序列化方式
+
+game:
+  server:
+    config:
+      service-id: 101 # 服务器中配置服务ID
+      server-id: 10101 # 当前服务器的ID
+      business-game-message-topic: business-game-message-topic-${game.server.config.server-id} # 监听的游戏服务接收消息的topic
+      gateway-game-message-topic: gateway-game-message-topic # 游戏服务器网关 topic 前缀
