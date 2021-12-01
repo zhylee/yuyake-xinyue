@@ -2,6 +2,7 @@ package cn.yuyake.gateway.server.handler;
 
 import cn.yuyake.common.cloud.PlayerServiceInstance;
 import cn.yuyake.common.utils.JWTUtil.TokenBody;
+import cn.yuyake.common.utils.TopicUtil;
 import cn.yuyake.game.bus.GameMessageInnerDecoder;
 import cn.yuyake.game.common.GameMessagePackage;
 import cn.yuyake.gateway.server.GatewayServerConfig;
@@ -62,7 +63,7 @@ public class DispatchGameMessageHandler extends ChannelInboundHandlerAdapter {
                 gameMessagePackage.getHeader().getAttribute().setClientIp(clientIp);
                 gameMessagePackage.getHeader().setPlayerId(playerId);
                 // 动态创建与业务服务交互的消息总线Topic
-                String topic = gatewayServerConfig.getBusinessGameMessageTopic() + toServerId;
+                String topic = TopicUtil.generateTopic(gatewayServerConfig.getBusinessGameMessageTopic(), toServerId);
                 // 向消息总线服务发布客户端请求消息
                 GameMessageInnerDecoder.sendMessage(kafkaTemplate, gameMessagePackage, topic);
                 logger.debug("发送消息成功->{}", gameMessagePackage.getHeader());
