@@ -27,6 +27,8 @@ public class GatewayServerConfig {
     private int allIdleTimeSeconds = 15;
     // 向游戏服务发送消息的Topic前缀
     private String businessGameMessageTopic = "business-game-message-topic";
+    // 接收游戏服务响应消息的Topic
+    private String gatewayGameMessageTopic = "gateway-game-message-topic";
 
     public int getPort() {
         return port;
@@ -122,5 +124,13 @@ public class GatewayServerConfig {
 
     public void setBusinessGameMessageTopic(String businessGameMessageTopic) {
         this.businessGameMessageTopic = businessGameMessageTopic;
+    }
+
+    public String getGatewayGameMessageTopic() {
+        return gatewayGameMessageTopic;
+    }
+
+    public void setGatewayGameMessageTopic(String gatewayGameMessageTopic) {
+        this.gatewayGameMessageTopic = gatewayGameMessageTopic;
     }
 }

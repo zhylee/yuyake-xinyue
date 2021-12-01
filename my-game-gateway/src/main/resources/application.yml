@@ -42,3 +42,4 @@ game:
         boss-thread-count: 1
         work-thread-count: 4
         business-game-message-topic: business-game-message-topic # 向游戏服务发送消息的Topic前缀
+        gateway-game-message-topic: gateway-game-message-topic-${game.gateway.server.config.server-id} # 接收游戏服务响应消息的Topic
