@@ -47,6 +47,10 @@ public class ConfirmHandler extends ChannelInboundHandlerAdapter {
         this.channelService = channelService;
     }
 
+    public TokenBody getTokenBody() {
+        return tokenBody;
+    }
+
     /**
      * 此方法会在连接建立成功 channel 注册之后调用
      */

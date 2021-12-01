@@ -9,6 +9,8 @@ public class GatewayServerConfig {
     private int port;
     private int bossThreadCount;
     private int workThreadCount;
+    // 服务器ID
+    private int serverId;
     // 达到压缩的消息最小大小
     private int compressMessageSize = 1024 * 2;
     // 等待认证的超时时间
@@ -23,6 +25,8 @@ public class GatewayServerConfig {
     private int writerIdleTimeSeconds = 12;
     // channel读写空闲时间
     private int allIdleTimeSeconds = 15;
+    // 向游戏服务发送消息的Topic前缀
+    private String businessGameMessageTopic = "business-game-message-topic";
 
     public int getPort() {
         return port;
@@ -46,6 +50,14 @@ public class GatewayServerConfig {
 
     public void setWorkThreadCount(int workThreadCount) {
         this.workThreadCount = workThreadCount;
+    }
+
+    public int getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(int serverId) {
+        this.serverId = serverId;
     }
 
     public int getCompressMessageSize() {
@@ -102,5 +114,13 @@ public class GatewayServerConfig {
 
     public void setAllIdleTimeSeconds(int allIdleTimeSeconds) {
         this.allIdleTimeSeconds = allIdleTimeSeconds;
+    }
+
+    public String getBusinessGameMessageTopic() {
+        return businessGameMessageTopic;
+    }
+
+    public void setBusinessGameMessageTopic(String businessGameMessageTopic) {
+        this.businessGameMessageTopic = businessGameMessageTopic;
     }
 }

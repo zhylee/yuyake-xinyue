@@ -1,10 +1,8 @@
 package cn.yuyake.gateway.server;
 
+import cn.yuyake.common.cloud.PlayerServiceInstance;
 import cn.yuyake.game.GameMessageService;
-import cn.yuyake.gateway.server.handler.ConfirmHandler;
-import cn.yuyake.gateway.server.handler.HeartbeatHandler;
-import cn.yuyake.gateway.server.handler.RequestRateLimiterHandler;
-import cn.yuyake.gateway.server.handler.TestGameMessageHandler;
+import cn.yuyake.gateway.server.handler.*;
 import cn.yuyake.gateway.server.handler.codec.DecodeHandler;
 import cn.yuyake.gateway.server.handler.codec.EncodeHandler;
 import com.google.common.util.concurrent.RateLimiter;
@@ -17,6 +15,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
@@ -29,6 +28,10 @@ public class GatewayServerBoot {
     private GameMessageService gameMessageService;
     @Autowired
     private ChannelService channelService;
+    @Autowired // 注入Kafka客户端
+    private KafkaTemplate<String, byte[]> kafkaTemplate;
+    @Autowired
+    private PlayerServiceInstance playerServiceInstance;
 
     private Logger logger = LoggerFactory.getLogger(GatewayServerBoot.class);
     private RateLimiter globalRateLimiter;
@@ -91,7 +94,8 @@ public class GatewayServerBoot {
                 // 处理心跳的handler
                 p.addLast("HeartbeatHandler", new HeartbeatHandler());
                 // 添加业务实现
-                p.addLast(new TestGameMessageHandler(gameMessageService));
+                //p.addLast(new TestGameMessageHandler(gameMessageService));
+                p.addLast(new DispatchGameMessageHandler(kafkaTemplate, playerServiceInstance, serverConfig));
             }
         };
         return channelInitializer;
