@@ -3,14 +3,18 @@ logging:
 spring:
   application:
     name: game-client
+  redis:
+    ssl: false
   cloud:
     consul:
       host: 192.168.63.131
       port: 8500
       discovery:
         enabled: false # 测试客户端不作为一个 spring cloud 中的一个服务被发现，所以它不用连接 consul，获取服务实例列表
+    bus:
+      enabled: false
 game:
   client:
     config:
       use-game-center: true
-      game-center-url: http://192.168.110.48:5001/game-center-server
+      game-center-url: http://192.168.110.48:5002

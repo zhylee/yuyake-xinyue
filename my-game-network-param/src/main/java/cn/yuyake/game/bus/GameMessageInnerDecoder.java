@@ -50,7 +50,8 @@ public class GameMessageInnerDecoder {
             ByteBuf bodyBuf = Unpooled.wrappedBuffer(gameMessagePackage.getBody());
             ByteBuf allBuf = Unpooled.wrappedBuffer(byteBuf, bodyBuf);
             // 获取消息包的最终 byte[]
-            value = allBuf.array();
+            value = new byte[allBuf.readableBytes()];
+            allBuf.readBytes(value);
         } else {
             value = byteBuf.array();
         }

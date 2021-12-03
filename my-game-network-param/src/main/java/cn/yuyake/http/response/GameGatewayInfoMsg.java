@@ -7,6 +7,9 @@ public class GameGatewayInfoMsg {
     private String token; // 连接此网关认证时需要的token
     private String rsaPrivateKey; // 客户端加密rsa私钥
 
+    public GameGatewayInfoMsg() {
+    }
+
     public GameGatewayInfoMsg(int id, String ip, int port) {
         this.id = id;
         this.ip = ip;
@@ -51,5 +54,10 @@ public class GameGatewayInfoMsg {
 
     public void setRsaPrivateKey(String rsaPrivateKey) {
         this.rsaPrivateKey = rsaPrivateKey;
+    }
+
+    @Override
+    public String toString() {
+        return "GameGatewayInfoMsg [id=" + id + ", ip=" + ip + ", port=" + port + ", token=" + token + "]";
     }
 }

@@ -9,7 +9,7 @@ import io.netty.buffer.Unpooled;
 /**
  * 响应数据对象
  */
-@GameMessageMetadata(messageId = 10001, serviceId = 1, messageType = EnumMessageType.RESPONSE) // 添加元数据信息
+@GameMessageMetadata(messageId = 10001, messageType = EnumMessageType.RESPONSE, serviceId = 1) // 添加元数据信息
 public class FirstMsgResponse extends AbstractGameMessage {
 
     private Long serverTime; // 返回服务器的时间

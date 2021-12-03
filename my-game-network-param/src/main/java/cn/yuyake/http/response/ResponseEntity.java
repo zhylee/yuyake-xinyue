@@ -2,6 +2,7 @@ package cn.yuyake.http.response;
 
 import cn.yuyake.common.error.IServerError;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * {

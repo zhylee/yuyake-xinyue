@@ -10,6 +10,7 @@ import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,11 +82,11 @@ public class RSAUtils {
     }
 
     public static byte[] decryptByPrivateKey(byte[] encryptedData, byte[] keyBytes) throws Exception {
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
+        PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
-        Key publicK = keyFactory.generatePublic(x509KeySpec);
+        Key privateK = keyFactory.generatePrivate(pkcs8KeySpec);
         Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
-        cipher.init(Cipher.DECRYPT_MODE, publicK);
+        cipher.init(Cipher.DECRYPT_MODE, privateK);
         int inputLen = encryptedData.length;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         int offSet = 0;

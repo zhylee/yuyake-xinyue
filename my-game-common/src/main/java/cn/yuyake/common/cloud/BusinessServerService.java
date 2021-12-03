@@ -1,8 +1,7 @@
-package cn.yuyake.gateway.server;
+package cn.yuyake.common.cloud;
 
 import cn.yuyake.common.error.GameErrorException;
 import cn.yuyake.common.model.ServerInfo;
-import cn.yuyake.error.GameCenterError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +53,7 @@ public class BusinessServerService implements ApplicationListener<HeartbeatEvent
             // 根据权重计算服务实例分布
             for (int i = 0; i < weight; i++) {
                 ServerInfo serverInfo = this.newServerInfo(instance);
-                List<ServerInfo> serverList = tempServerInfoMap.computeIfAbsent(serverInfo.getServerId(), s -> new ArrayList<>());
+                List<ServerInfo> serverList = tempServerInfoMap.computeIfAbsent(serverInfo.getServiceId(), s -> new ArrayList<>());
                 serverList.add(serverInfo);
             }
         });
@@ -69,7 +68,8 @@ public class BusinessServerService implements ApplicationListener<HeartbeatEvent
         Map<Integer, List<ServerInfo>> serverInfoMap = this.serverInfos;
         List<ServerInfo> serverList = serverInfoMap.get(serviceId);
         if (serverList == null || serverList.size() == 0) {
-            throw GameErrorException.newBuilder(GameCenterError.NO_GAME_GATEWAY_INFO).build();
+            return null;
+            // throw GameErrorException.newBuilder(GameCenterError.NO_GAME_GATEWAY_INFO).build();
         }
         // 负载均衡的一个算法，使用 playerId 进行 hash 和服务器数量求余
         int hashCode = Math.abs(playerId.hashCode());
@@ -110,5 +110,17 @@ public class BusinessServerService implements ApplicationListener<HeartbeatEvent
     public void onApplicationEvent(HeartbeatEvent event) {
         // 接收服务注册中心的心跳事件，每发生一次心跳事件，就刷新一次服务信息
         this.refreshBusinessServerInfo();
+    }
+
+    /**
+     * 判断某个服务中的serverId是否还有效
+     */
+    public boolean isEnableServer(int serviceId, int serverId) {
+        Map<Integer, List<ServerInfo>> serverInfoMap = this.serverInfos;
+        List<ServerInfo> serverInfoList = serverInfoMap.get(serviceId);
+        if(serverInfoList != null) {
+            return serverInfoList.stream().anyMatch(c-> c.getServerId() == serverId);
+        }
+        return false;
     }
 }

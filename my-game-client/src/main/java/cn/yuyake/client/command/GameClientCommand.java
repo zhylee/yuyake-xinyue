@@ -2,10 +2,12 @@ package cn.yuyake.client.command;
 
 import cn.yuyake.client.service.GameClientBoot;
 import cn.yuyake.client.service.GameClientConfig;
+import cn.yuyake.game.message.ConfirmMsgRequest;
 import cn.yuyake.game.message.FirstMsgRequest;
 import cn.yuyake.game.message.SecondMsgRequest;
 import cn.yuyake.game.message.ThirdMsgRequest;
 import cn.yuyake.game.message.body.ThirdMsgBody;
+import cn.yuyake.game.message.xinyue.EnterGameMsgRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,11 @@ public class GameClientCommand {
 
     @ShellMethod("发送测试消息，格式：send-test-msg 消息号")
     public void sendTestMsg(int messageId) {
+        if(messageId == 1) {//发送认证请求
+            ConfirmMsgRequest request = new ConfirmMsgRequest();
+            request.getBodyObj().setToken(gameClientConfig.getGatewayToken());
+            gameClientBoot.getChannel().writeAndFlush(request);
+        }
         if (messageId == 10001) {
             // 向服务器发送一条消息
             FirstMsgRequest request = new FirstMsgRequest();
@@ -72,5 +79,14 @@ public class GameClientCommand {
             request.setRequestBody(requestBody);
             gameClientBoot.getChannel().writeAndFlush(request);
         }
+        if (messageId == 201) { // 进入游戏
+            EnterGameMsgRequest request = new EnterGameMsgRequest();
+            gameClientBoot.getChannel().writeAndFlush(request);
+        }
+    }
+
+    @ShellMethod("关闭连接")
+    public void close() {
+        gameClientBoot.getChannel().close();
     }
 }

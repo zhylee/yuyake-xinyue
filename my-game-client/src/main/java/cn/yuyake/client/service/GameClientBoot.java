@@ -34,6 +34,9 @@ public class GameClientBoot {
     private Channel channel;
 
     public void launch() {
+        if(channel != null) {
+            channel.close();
+        }
         // 从配置中获取处理业务的线程数
         eventGroup = new NioEventLoopGroup(gameClientConfig.getWorkThreads());
         bootstrap = new Bootstrap();

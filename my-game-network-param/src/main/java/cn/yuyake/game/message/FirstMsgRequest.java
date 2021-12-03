@@ -4,7 +4,7 @@ import cn.yuyake.game.common.AbstractGameMessage;
 import cn.yuyake.game.common.EnumMessageType;
 import cn.yuyake.game.common.GameMessageMetadata;
 
-@GameMessageMetadata(messageId = 10001, serviceId = 1, messageType = EnumMessageType.REQUEST) // 添加元数据信息
+@GameMessageMetadata(messageId = 10001, messageType = EnumMessageType.REQUEST, serviceId = 1) // 添加元数据信息
 public class FirstMsgRequest extends AbstractGameMessage {
 
     private String value;

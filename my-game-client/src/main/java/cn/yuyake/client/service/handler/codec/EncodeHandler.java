@@ -63,7 +63,6 @@ public class EncodeHandler extends MessageToByteEncoder<IGameMessage> {
         GameMessageHeader header = msg.getHeader();
         out.writeInt(messageSize); // 依次写入包头数据
         out.writeInt(++seqId);
-        out.writeInt(header.getClientSeqId());
         out.writeInt(header.getMessageId());
         out.writeShort(header.getServiceId());
         out.writeLong(header.getClientSendTime());

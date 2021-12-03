@@ -30,6 +30,11 @@ spring:
       key-serializer:
         org.apache.kafka.common.serialization.StringSerializer  # 指定生产者的Key的序列化方式
     bootstrap-servers: 192.168.63.131:9092
+  redis:
+    host: 192.168.63.131 # 修改为自己的 Redis 服务地址
+    port: 6379
+    password: R6YMtyPGS0f968IM
+    database: 10
 
 
 

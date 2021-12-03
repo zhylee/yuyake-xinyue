@@ -1,4 +1,4 @@
-package cn.yuyake.client.service.handler.loginhandler;
+package cn.yuyake.client.service.loginhandler;
 
 import cn.yuyake.client.service.handler.GameClientChannelContext;
 import cn.yuyake.game.message.FirstMsgResponse;

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -56,15 +57,20 @@ public class ConfirmHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
+        String remoteHost = ipSocket.getAddress().getHostAddress();
+        logger.debug("客户端 {} 连接成功，channelId：{}", remoteHost, ctx.channel().id().asShortText());
         // 从配置中获取延迟时间
         int delay = serverConfig.getWaitConfirmTimeoutSecond();
         // 添加延时定时器
         future = ctx.channel().eventLoop().schedule(() -> {
             // 如果没有认证成功，则关闭
             if (!confirmSuccess) {
+                logger.debug("连接认证超时，断开连接，channelId：{}", ctx.channel().id().asShortText());
                 ctx.close();
             }
         }, delay, TimeUnit.SECONDS);
+        ctx.fireChannelActive();
     }
 
     @Override
@@ -94,6 +100,7 @@ public class ConfirmHandler extends ChannelInboundHandlerAdapter {
                 returnPackage.setHeader(response.getHeader());
                 returnPackage.setBody(response.body());
                 // 在关闭之后，给这个连接返回一条提示信息，告诉客户帐号可能异地登录了
+                existChannel.writeAndFlush(returnPackage);
                 existChannel.close();
             }
         }
@@ -137,6 +144,10 @@ public class ConfirmHandler extends ChannelInboundHandlerAdapter {
                     returnPackage.setHeader(response.getHeader());
                     returnPackage.setBody(response.body());
                     ctx.writeAndFlush(returnPackage);
+                    // 通知各个服务，某个用户连接成功
+//                    InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
+//                    String ip = ipSocket.getAddress().getHostAddress();
+//                    this.sendConnectStatusMsg(true, ctx.executor(), ip);
                 } catch (Exception e) {
                     // 告诉客户端 token 过期，让客户端重新获取并连接
                     if (e instanceof ExpiredJwtException) {

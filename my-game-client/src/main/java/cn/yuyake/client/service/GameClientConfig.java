@@ -13,7 +13,7 @@ public class GameClientConfig {
     // 默认提供的游戏网关地址：localhost
     private String defaultGameGatewayHost = "localhost";
     // 默认提供的游戏网关的端口：6001
-    private int defaultGameGatewayPort = 6001;
+    private int defaultGameGatewayPort = 6003;
     // 是否使用服务中心，如果返回false，则使用默认游戏网关，不从服务中心获取网关信息；返回true，则从服务中心获取网关信息
     private boolean useGameCenter;
     // 游戏服务中心地址，默认是：http://localhost:5003，可以配置为网关的地址
