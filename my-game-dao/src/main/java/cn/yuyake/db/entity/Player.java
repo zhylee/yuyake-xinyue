@@ -3,6 +3,8 @@ package cn.yuyake.db.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 @Document(collection = "Player")
 public class Player {
 
@@ -11,6 +13,8 @@ public class Player {
     private String nickName;
     private long lastLoginTime;
     private long createTime;
+
+    private ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
 
     public long getPlayerId() {
         return playerId;
@@ -42,5 +46,13 @@ public class Player {
 
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
+    }
+
+    public ConcurrentHashMap<String, Integer> getMap() {
+        return map;
+    }
+
+    public void setMap(ConcurrentHashMap<String, Integer> map) {
+        this.map = map;
     }
 }
