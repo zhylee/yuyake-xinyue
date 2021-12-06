@@ -75,6 +75,7 @@ public class GatewayServerBoot {
         ChannelInitializer<Channel> channelInitializer = new ChannelInitializer<Channel>() {
             @Override
             protected void initChannel(Channel ch) throws Exception {
+                // 初始化Channel时，添加Handler
                 ChannelPipeline p = ch.pipeline();
                 // 添加编码Handler
                 p.addLast("EncodeHandler", new EncodeHandler(serverConfig));

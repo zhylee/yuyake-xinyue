@@ -1,0 +1,4 @@
+dependencies {
+    implementation project(":my-game-network-param")
+    implementation project(":my-game-dao")
+}
