@@ -3,7 +3,6 @@ package cn.yuyake.gateway.message.channel;
 import cn.yuyake.common.cloud.GameChannelCloseEvent;
 import cn.yuyake.common.concurrent.GameEventExecutorGroup;
 import cn.yuyake.game.common.IGameMessage;
-import cn.yuyake.gateway.message.rpc.GameRpcService;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Promise;
 import org.slf4j.Logger;
@@ -31,21 +30,17 @@ public class GameMessageEventDispatchService {
 
     private final GameChannelInitializer channelInitializer;
 
-    private final GameRpcService gameRpcSendFactory;
-
     private final ApplicationContext context;
 
     public GameMessageEventDispatchService(
             ApplicationContext context,
             GameEventExecutorGroup workerGroup,
             IMessageSendFactory messageSendFactory,
-            GameRpcService gameRpcSendFactory,
             GameChannelInitializer channelInitializer) {
         this.executor = workerGroup.next();
         this.workerGroup = workerGroup;
         this.messageSendFactory = messageSendFactory;
         this.channelInitializer = channelInitializer;
-        this.gameRpcSendFactory = gameRpcSendFactory;
         this.context = context;
     }
 
@@ -77,7 +72,7 @@ public class GameMessageEventDispatchService {
     private GameChannel getGameChannel(Long playerId) {
         return this.gameChannelGroup.computeIfAbsent(playerId, i -> {
             // 从集合中获取一个GameChannel，如果这个GameChannel为空，则重新创建，并初始化注册这个Channel
-            var newChannel = new GameChannel(playerId, this, messageSendFactory, gameRpcSendFactory);
+            var newChannel = new GameChannel(playerId, this, messageSendFactory);
             // 初始化Channel，可以通过这个接口向GameChannel中添加处理消息的Handler
             this.channelInitializer.initChannel(newChannel);
             // 发注册GameChannel的事件

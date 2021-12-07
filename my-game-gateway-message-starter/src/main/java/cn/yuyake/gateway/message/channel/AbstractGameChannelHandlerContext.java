@@ -38,6 +38,10 @@ public abstract class AbstractGameChannelHandlerContext {
         return pipeline.gameChannel();
     }
 
+    public String name() {
+        return name;
+    }
+
     public EventExecutor executor() {
         if (executor == null) {
             return gameChannel().executor();
@@ -134,24 +138,6 @@ public abstract class AbstractGameChannelHandlerContext {
         }
     }
 
-    static void invokeChannelReadRPCRequest(final AbstractGameChannelHandlerContext next, final IGameMessage msg) {
-        ObjectUtil.checkNotNull(msg, "msg");
-        EventExecutor executor = next.executor();
-        if (executor.inEventLoop()) {
-            next.invokeChannelReadRPCRequest(msg);
-        } else {
-            executor.execute(() -> next.invokeChannelReadRPCRequest(msg));
-        }
-    }
-
-    private void invokeChannelReadRPCRequest(IGameMessage msg) {
-        try {
-            ((GameChannelInboundHandler) handler()).channelReadRPCRequest(this, msg);
-        } catch (Throwable t) {
-            notifyHandlerException(t);
-        }
-    }
-
     private void invokeWrite(IGameMessage msg, GameChannelPromise promise) {
         try {
             ((GameChannelOutboundHandler) handler()).writeAndFlush(this, msg, promise);
@@ -197,11 +183,6 @@ public abstract class AbstractGameChannelHandlerContext {
 
     public AbstractGameChannelHandlerContext fireChannelRegistered(long playerId, GameChannelPromise promise) {
         invokeChannelRegistered(findContextInbound(), playerId, promise);
-        return this;
-    }
-
-    public AbstractGameChannelHandlerContext fireChannelReadRPCRequest(final IGameMessage msg) {
-        invokeChannelReadRPCRequest(findContextInbound(), msg);
         return this;
     }
 

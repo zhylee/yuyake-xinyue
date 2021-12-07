@@ -1,6 +1,5 @@
 package cn.yuyake.gateway.message.channel;
 
-import cn.yuyake.game.common.IGameMessage;
 import io.netty.util.concurrent.Promise;
 
 public interface GameChannelInboundHandler extends GameChannelHandler {
@@ -12,9 +11,6 @@ public interface GameChannelInboundHandler extends GameChannelHandler {
 
     //读取并处理客户端发送的消息
     void channelRead(AbstractGameChannelHandlerContext ctx, Object msg) throws Exception;
-
-    //读取并处理RPC的请求消息
-    void channelReadRPCRequest(AbstractGameChannelHandlerContext ctx, IGameMessage msg) throws Exception;
 
     //触发一些内部事件
     void userEventTriggered(AbstractGameChannelHandlerContext ctx, Object evt, Promise<Object> promise) throws Exception;

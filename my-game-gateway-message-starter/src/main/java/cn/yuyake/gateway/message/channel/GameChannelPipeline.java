@@ -1,15 +1,23 @@
 package cn.yuyake.gateway.message.channel;
 
+import cn.yuyake.common.concurrent.GameEventExecutorGroup;
 import cn.yuyake.game.common.GameMessageHeader;
 import cn.yuyake.game.common.GameMessagePackage;
 import cn.yuyake.game.common.IGameMessage;
 import io.netty.channel.DefaultChannelPipeline;
 import io.netty.util.ReferenceCountUtil;
+import io.netty.util.concurrent.EventExecutor;
+import io.netty.util.concurrent.EventExecutorGroup;
+import io.netty.util.concurrent.FastThreadLocal;
 import io.netty.util.concurrent.Promise;
 import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.StringUtil;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * 主要负责管理Handler的链表
@@ -19,8 +27,15 @@ public class GameChannelPipeline {
     private static final String HEAD_NAME = generateName0(HeadContext.class);
     private static final String TAIL_NAME = generateName0(TailContext.class);
     private final GameChannel channel;
+    private Map<EventExecutorGroup, EventExecutor> childExecutors;
     final AbstractGameChannelHandlerContext head;
     final AbstractGameChannelHandlerContext tail;
+    private static final FastThreadLocal<Map<Class<?>, String>> nameCaches = new FastThreadLocal<>() {
+        @Override
+        protected Map<Class<?>, String> initialValue() {
+            return new WeakHashMap<>();
+        }
+    };
 
     public GameChannelPipeline(GameChannel channel) {
         this.channel = ObjectUtil.checkNotNull(channel, "channel");
@@ -72,6 +87,113 @@ public class GameChannelPipeline {
     // 发送写出事件的重载方法
     public final GameChannelFuture writeAndFlush(IGameMessage msg) {
         return tail.writeAndFlush(msg);
+    }
+
+    public final GameChannelPipeline addLast(GameChannelHandler... handlers) {
+        return addLast(null, false, handlers);
+    }
+
+    public final GameChannelPipeline addLast(GameEventExecutorGroup executor, boolean singleEventExecutorPerGroup, GameChannelHandler... handlers) {
+        if (handlers == null) {
+            throw new NullPointerException("handlers");
+        }
+        for (GameChannelHandler h : handlers) {
+            if (h == null) {
+                break;
+            }
+            addLast(executor, singleEventExecutorPerGroup, null, h);
+        }
+        return this;
+    }
+
+    public final GameChannelPipeline addLast(GameEventExecutorGroup group, boolean singleEventExecutorPerGroup, String name, GameChannelHandler handler) {
+        final AbstractGameChannelHandlerContext newCtx;
+        synchronized (this) {
+            newCtx = newContext(group, singleEventExecutorPerGroup, filterName(name, handler), handler);
+            addLast0(newCtx);
+        }
+        return this;
+    }
+
+    private void addLast0(AbstractGameChannelHandlerContext newCtx) {
+        AbstractGameChannelHandlerContext prev = tail.prev;
+        newCtx.prev = prev;
+        newCtx.next = tail;
+        prev.next = newCtx;
+        tail.prev = newCtx;
+    }
+
+    // 创建一个实例
+    private AbstractGameChannelHandlerContext newContext(GameEventExecutorGroup group, boolean singleEventExecutorPerGroup, String name, GameChannelHandler handler) {
+        return new DefaultGameChannelHandlerContext(this, childExecutor(group, singleEventExecutorPerGroup), name, handler);
+    }
+
+    private EventExecutor childExecutor(GameEventExecutorGroup group, boolean singleEventExecutorPerGroup) {
+        if (group == null) {
+            return null;
+        }
+
+        if (!singleEventExecutorPerGroup) {
+            return group.next();
+        }
+        Map<EventExecutorGroup, EventExecutor> childExecutors = this.childExecutors;
+        if (childExecutors == null) {
+            // Use size of 4 as most people only use one extra EventExecutor.
+            childExecutors = this.childExecutors = new IdentityHashMap<>(4);
+        }
+        // Pin one of the child executors once and remember it so that the same child executor
+        // is used to fire events for the same channel.
+        EventExecutor childExecutor = childExecutors.get(group);
+        if (childExecutor == null) {
+            childExecutor = group.next();
+            childExecutors.put(group, childExecutor);
+        }
+        return childExecutor;
+    }
+
+    private String filterName(String name, GameChannelHandler handler) {
+        if (name == null) {
+            return generateName(handler);
+        }
+        if (context0(name) != null) {
+            throw new IllegalArgumentException("Duplicate handler name: " + name);
+        }
+        return name;
+    }
+
+    private String generateName(GameChannelHandler handler) {
+        Map<Class<?>, String> cache = nameCaches.get();
+        Class<?> handlerType = handler.getClass();
+        String name = cache.get(handlerType);
+        if (name == null) {
+            name = generateName0(handlerType);
+            cache.put(handlerType, name);
+        }
+        // It's not very likely for a user to put more than one handler of the same type, but make sure to
+        // avoid
+        // any name conflicts. Note that we don't cache the names generated here.
+        if (context0(name) != null) {
+            String baseName = name.substring(0, name.length() - 1); // Strip the trailing '0'.
+            for (int i = 1;; i++) {
+                String newName = baseName + i;
+                if (context0(newName) == null) {
+                    name = newName;
+                    break;
+                }
+            }
+        }
+        return name;
+    }
+
+    private AbstractGameChannelHandlerContext context0(String name) {
+        AbstractGameChannelHandlerContext context = head.next;
+        while (context != tail) {
+            if (context.name().equals(name)) {
+                return context;
+            }
+            context = context.next;
+        }
+        return null;
     }
 
     private static String generateName0(Class<?> handlerType) {
@@ -132,16 +254,6 @@ public class GameChannelPipeline {
         public void close(AbstractGameChannelHandlerContext ctx, GameChannelPromise promise) {
             channel.unsafeClose();
         }
-
-        @Override
-        public void channelReadRPCRequest(AbstractGameChannelHandlerContext ctx, IGameMessage msg) throws Exception {
-            ctx.fireChannelReadRPCRequest(msg);
-        }
-
-        @Override
-        public void writeRPCMessage(AbstractGameChannelHandlerContext ctx, IGameMessage gameMessage, Promise<IGameMessage> callback) {
-            channel.unsafeSendRpcMessage(gameMessage, callback);
-        }
     }
 
     final class TailContext extends AbstractGameChannelHandlerContext implements GameChannelInboundHandler {
@@ -187,15 +299,6 @@ public class GameChannelPipeline {
         public void channelRegister(AbstractGameChannelHandlerContext ctx, long playerId, GameChannelPromise promise) {
             promise.setSuccess();
             logger.debug("注册事件未处理");
-        }
-
-        @Override
-        public void channelReadRPCRequest(AbstractGameChannelHandlerContext ctx, IGameMessage msg) throws Exception {
-            try {
-                logger.debug("Discarded inbound message {} that reached at the tail of the pipeline. " + "Please check your pipeline configuration.", msg);
-            } finally {
-                ReferenceCountUtil.release(msg);
-            }
         }
     }
 

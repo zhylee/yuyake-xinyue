@@ -38,7 +38,7 @@ public class GameClientInitService {
             // 因为是测试环境，这里使用一些默认参数
             SelectGameGatewayParam param = new SelectGameGatewayParam();
             param.setOpenId("test_openId");
-            param.setPlayerId(1);
+            param.setPlayerId(3);
             param.setUserId(1);
             param.setZoneId("1");
             GameGatewayInfoMsg gateGatewayMsg = this.selectGatewayInfoFromGameCenter(param);

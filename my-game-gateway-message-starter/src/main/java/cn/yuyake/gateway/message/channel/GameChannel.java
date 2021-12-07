@@ -1,10 +1,8 @@
 package cn.yuyake.gateway.message.channel;
 
-import cn.yuyake.game.common.EnumMessageType;
 import cn.yuyake.game.common.GameMessagePackage;
 import cn.yuyake.game.common.IGameMessage;
 import cn.yuyake.gateway.message.context.ServerConfig;
-import cn.yuyake.gateway.message.rpc.GameRpcService;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Promise;
 import org.slf4j.Logger;
@@ -33,14 +31,12 @@ public class GameChannel {
     private final List<Runnable> waitTaskList = new ArrayList<>(5);
     private final long playerId;
     private int gatewayServerId;
-    private final GameRpcService gameRpcSendFactory;
     private final ServerConfig serverConfig;
 
-    public GameChannel(long playerId, GameMessageEventDispatchService gameChannelService, IMessageSendFactory messageSendFactory, GameRpcService gameRpcSendFactory) {
+    public GameChannel(long playerId, GameMessageEventDispatchService gameChannelService, IMessageSendFactory messageSendFactory) {
         this.playerId = playerId;
         this.gameChannelService = gameChannelService;
         this.messageSendFactory = messageSendFactory;
-        this.gameRpcSendFactory = gameRpcSendFactory;
         this.channelPipeline = new GameChannelPipeline(this);
         this.serverConfig = gameChannelService.getApplicationContext().getBean(ServerConfig.class);
     }
@@ -133,13 +129,5 @@ public class GameChannel {
 
     protected void unsafeClose() {
         this.gameChannelService.fireInactiveChannel(playerId);
-    }
-
-    protected void unsafeSendRpcMessage(IGameMessage gameMessage, Promise<IGameMessage> callback) {
-        if (gameMessage.getHeader().getMessageType() == EnumMessageType.RPC_REQUEST) {
-            this.gameRpcSendFactory.sendRPCRequest(gameMessage, callback);
-        } else if (gameMessage.getHeader().getMessageType() == EnumMessageType.RPC_RESPONSE) {
-            this.gameRpcSendFactory.sendRPCResponse(gameMessage);
-        }
     }
 }

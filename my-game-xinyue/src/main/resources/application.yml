@@ -5,6 +5,14 @@ server:
 spring:
   application:
     name: game-xinyue
+  data:
+    mongodb:
+      host: 192.168.63.131 # 修改为自己的数据库地址
+      port: 27017
+      username: my-game # 修改为自己的数据库用户名
+      password: xxx123456 # 修改为自己的数据库密码
+      authentication-database: admin
+      database: my-game
   cloud:
     consul:
       host: 192.168.63.131
@@ -41,3 +49,7 @@ game:
       server-id: 10101 # 当前服务器的ID
       business-game-message-topic: business-game-message-topic-${game.server.config.server-id} # 监听的游戏服务接收消息的topic
       gateway-game-message-topic: gateway-game-message-topic # 游戏服务器网关 topic 前缀
+  channel:
+    gateway-game-message-topic: gateway-game-message-topic
+    business-game-message-topic: business-game-message-topic
+    topic-group-id: ${game.server.config.server-id}

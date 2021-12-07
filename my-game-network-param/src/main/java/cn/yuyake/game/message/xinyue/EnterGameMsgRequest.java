@@ -14,6 +14,6 @@ public class EnterGameMsgRequest extends AbstractJsonGameMessage<RequestBody> {
 
     @Override
     protected Class<RequestBody> getBodyObjClass() {
-        return null;
+        return RequestBody.class;
     }
 }

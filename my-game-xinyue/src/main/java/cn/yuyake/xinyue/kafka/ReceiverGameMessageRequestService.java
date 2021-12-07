@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 /**
  * 此类主要用于学习和测试
  */
-@Service
+// @Service
 public class ReceiverGameMessageRequestService {
     private final Logger logger = LoggerFactory.getLogger(ReceiverGameMessageRequestService.class);
 

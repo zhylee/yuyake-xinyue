@@ -2,6 +2,7 @@ package cn.yuyake.center.service;
 
 import cn.yuyake.common.error.GameErrorException;
 import cn.yuyake.common.utils.JWTUtil;
+import cn.yuyake.dao.PlayerDao;
 import cn.yuyake.db.entity.Player;
 import cn.yuyake.error.GameCenterError;
 import cn.yuyake.http.request.SelectGameGatewayParam;
@@ -17,6 +18,8 @@ public class PlayerService {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private PlayerDao playerDao;
 
     private Logger logger = LoggerFactory.getLogger(PlayerService.class);
 
@@ -55,6 +58,7 @@ public class PlayerService {
         player.setCreateTime(player.getLastLoginTime());
         // 再次更新一下 nickName 对应的 playerId
         this.updatePlayerIdForNickName(zoneId, nickName, playerId);
+        playerDao.saveOrUpdate(player, playerId);
         logger.info("创建角色成功，{}", player);
         return player;
     }
