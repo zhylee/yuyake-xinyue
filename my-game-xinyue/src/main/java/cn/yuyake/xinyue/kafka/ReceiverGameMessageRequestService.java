@@ -8,7 +8,7 @@ import cn.yuyake.game.common.GameMessagePackage;
 import cn.yuyake.game.common.IGameMessage;
 import cn.yuyake.game.message.xinyue.EnterGameMsgRequest;
 import cn.yuyake.game.message.xinyue.EnterGameMsgResponse;
-import cn.yuyake.xinyue.common.ServerConfig;
+import cn.yuyake.gateway.message.context.ServerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

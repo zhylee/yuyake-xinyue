@@ -12,12 +12,21 @@ public class GameMessageHeader implements Cloneable {
     private int fromServerId;
     private int toServerId;
     private long playerId;
+    private EnumMessageType messageType;
     private HeaderAttribute attribute = new HeaderAttribute();
 
     @Override
     public GameMessageHeader clone() throws CloneNotSupportedException {
         GameMessageHeader newHeader = (GameMessageHeader) super.clone();
         return newHeader;
+    }
+
+    public EnumMessageType getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(EnumMessageType messageType) {
+        this.messageType = messageType;
     }
 
     public int getClientSeqId() {

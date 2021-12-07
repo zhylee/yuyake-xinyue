@@ -1,7 +1,9 @@
 package cn.yuyake.gateway.message.channel;
 
+import cn.yuyake.game.common.EnumMessageType;
 import cn.yuyake.game.common.GameMessagePackage;
 import cn.yuyake.game.common.IGameMessage;
+import cn.yuyake.gateway.message.context.ServerConfig;
 import cn.yuyake.gateway.message.rpc.GameRpcService;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Promise;
@@ -30,7 +32,9 @@ public class GameChannel {
     // 事件等待队列，如果GameChannel还没有注册成功，这个时候又有新的消息过来了，就让事件在这个队列中等待
     private final List<Runnable> waitTaskList = new ArrayList<>(5);
     private final long playerId;
+    private int gatewayServerId;
     private final GameRpcService gameRpcSendFactory;
+    private final ServerConfig serverConfig;
 
     public GameChannel(long playerId, GameMessageEventDispatchService gameChannelService, IMessageSendFactory messageSendFactory, GameRpcService gameRpcSendFactory) {
         this.playerId = playerId;
@@ -38,6 +42,15 @@ public class GameChannel {
         this.messageSendFactory = messageSendFactory;
         this.gameRpcSendFactory = gameRpcSendFactory;
         this.channelPipeline = new GameChannelPipeline(this);
+        this.serverConfig = gameChannelService.getApplicationContext().getBean(ServerConfig.class);
+    }
+
+    public ServerConfig getServerConfig() {
+        return serverConfig;
+    }
+
+    public int getGatewayServerId() {
+        return gatewayServerId;
     }
 
     public long getPlayerId() {
@@ -78,7 +91,10 @@ public class GameChannel {
     }
 
     public void fireReadGameMessage(IGameMessage gameMessage) {
-        this.safeExecute(() -> this.channelPipeline.fireChannelRead(gameMessage));
+        this.safeExecute(() -> {
+            this.gatewayServerId = gameMessage.getHeader().getFromServerId();
+            this.channelPipeline.fireChannelRead(gameMessage);
+        });
     }
 
     public void fireUserEvent(Object message, Promise<Object> promise) {
@@ -112,6 +128,18 @@ public class GameChannel {
             }
         } catch (Throwable e) {
             logger.error("服务器异常", e);
+        }
+    }
+
+    protected void unsafeClose() {
+        this.gameChannelService.fireInactiveChannel(playerId);
+    }
+
+    protected void unsafeSendRpcMessage(IGameMessage gameMessage, Promise<IGameMessage> callback) {
+        if (gameMessage.getHeader().getMessageType() == EnumMessageType.RPC_REQUEST) {
+            this.gameRpcSendFactory.sendRPCRequest(gameMessage, callback);
+        } else if (gameMessage.getHeader().getMessageType() == EnumMessageType.RPC_RESPONSE) {
+            this.gameRpcSendFactory.sendRPCResponse(gameMessage);
         }
     }
 }

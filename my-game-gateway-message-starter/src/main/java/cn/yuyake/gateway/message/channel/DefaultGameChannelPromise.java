@@ -9,4 +9,15 @@ public class DefaultGameChannelPromise extends DefaultPromise<Void> implements G
     public DefaultGameChannelPromise(GameChannel channel) {
         this.channel = channel;
     }
+
+    @Override
+    public GameChannelPromise setSuccess(Void result) {
+        super.setSuccess(result);
+        return this;
+    }
+
+    @Override
+    public GameChannelPromise setSuccess() {
+        return setSuccess(null);
+    }
 }

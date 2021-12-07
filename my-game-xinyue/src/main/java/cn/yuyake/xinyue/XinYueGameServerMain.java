@@ -1,7 +1,7 @@
 package cn.yuyake.xinyue;
 
 import cn.yuyake.game.messagedispatcher.DispatchGameMessageService;
-import cn.yuyake.xinyue.common.ServerConfig;
+import cn.yuyake.gateway.message.context.ServerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;

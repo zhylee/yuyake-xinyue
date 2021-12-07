@@ -1,4 +1,5 @@
 dependencies {
     implementation project(":my-game-network-param")
     implementation project(":my-game-dao")
+    implementation project(":my-game-gateway-message-starter")
 }
