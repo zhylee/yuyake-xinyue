@@ -6,6 +6,7 @@ import io.netty.util.concurrent.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class PlayerTest {
@@ -70,6 +71,40 @@ public class PlayerTest {
                 }
             });
         });
+    }
+
+    /**
+     * 多线程并发操作数据导致的错误或异常
+     */
+    public static void main(String[] args) {
+        Player player = new Player();
+        player.setPlayerId(1);
+        PlayerService playerService = new PlayerService();
+        // 模拟在缓存中添加一个用户
+        playerService.addPlayer(player);
+        AtomicInteger count = new AtomicInteger();
+        Thread t1 = new Thread(() -> {
+            while (count.get() < 10000) {
+                Player p = playerService.getPlayer(1L);
+                // 模拟一个用户在线程1遍历Player中的Map
+                p.getMap().forEach((k, v) -> System.out.println(v));
+            }
+        });
+        t1.start();
+        Thread t2 = new Thread(() -> {
+            while (count.get() < 10000) {
+                int index = count.incrementAndGet();
+                Player p = playerService.getPlayer(1L);
+                // 模拟一个用户在线程修改Map
+                p.getMap().put("a" + index, index);
+            }
+        });
+        t2.start();
+        try {
+            t2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }
