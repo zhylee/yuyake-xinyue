@@ -2,6 +2,7 @@ package cn.yuyake.xinyue;
 
 import cn.yuyake.dao.PlayerDao;
 import cn.yuyake.game.messagedispatcher.DispatchGameMessageService;
+import cn.yuyake.gateway.message.context.DispatchUserEventService;
 import cn.yuyake.gateway.message.context.GatewayMessageConsumerService;
 import cn.yuyake.gateway.message.context.ServerConfig;
 import cn.yuyake.gateway.message.handler.GameChannelIdleStateHandler;
@@ -26,11 +27,12 @@ public class XinYueGameServerMain {
         // 获取Player数据操作类实例
         PlayerDao playerDao = context.getBean(PlayerDao.class);
         DispatchGameMessageService dispatchGameMessageService = context.getBean(DispatchGameMessageService.class);
+        DispatchUserEventService dispatchUserEventService = context.getBean(DispatchUserEventService.class);
         gatewayMessageConsumerService.start((gameChannel) -> {
             // 初始化channel
             gameChannel.getChannelPipeline().addLast(new GameChannelIdleStateHandler(60, 60, 50));
             // 启动网关监听，并初始化GameChanelHandler
-            gameChannel.getChannelPipeline().addLast(new GameBusinessMessageDispatchHandler(dispatchGameMessageService, playerDao));
+            gameChannel.getChannelPipeline().addLast(new GameBusinessMessageDispatchHandler(dispatchGameMessageService, dispatchUserEventService, playerDao));
         });
     }
 }

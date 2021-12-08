@@ -1,20 +1,21 @@
 package cn.yuyake.xinyue.logic;
 
+import cn.yuyake.db.entity.Player;
 import cn.yuyake.game.message.xinyue.*;
 import cn.yuyake.game.messagedispatcher.GameMessageHandler;
 import cn.yuyake.game.messagedispatcher.GameMessageMapping;
 import cn.yuyake.gateway.message.context.GatewayMessageContext;
+import cn.yuyake.gateway.message.context.UserEvent;
+import cn.yuyake.gateway.message.context.UserEventContext;
 import cn.yuyake.xinyue.logic.event.GetArenaPlayerEvent;
 import cn.yuyake.xinyue.logic.event.GetPlayerInfoEvent;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @GameMessageHandler
@@ -77,5 +78,12 @@ public class PlayerLogicHandler {
                 }
             });
         });
+    }
+
+    @UserEvent(IdleStateEvent.class) // 处理GameChannel空闲事件
+    public void idleStateEvent(UserEventContext utx, IdleStateEvent event, Promise<Object> promise) {
+        logger.debug("收到空闲事件：{}", event.getClass().getName());
+        // Channel空闲时，关闭Channel。会自动清理GameChannel的缓存
+        utx.getCtx().close();
     }
 }

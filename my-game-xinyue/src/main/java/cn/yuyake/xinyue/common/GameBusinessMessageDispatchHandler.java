@@ -8,7 +8,9 @@ import cn.yuyake.game.messagedispatcher.DispatchGameMessageService;
 import cn.yuyake.gateway.message.channel.AbstractGameChannelHandlerContext;
 import cn.yuyake.gateway.message.channel.GameChannelInboundHandler;
 import cn.yuyake.gateway.message.channel.GameChannelPromise;
+import cn.yuyake.gateway.message.context.DispatchUserEventService;
 import cn.yuyake.gateway.message.context.GatewayMessageContext;
+import cn.yuyake.gateway.message.context.UserEventContext;
 import cn.yuyake.xinyue.logic.event.GetPlayerInfoEvent;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.Promise;
@@ -22,11 +24,16 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
     private static final Logger logger = LoggerFactory.getLogger(GameBusinessMessageDispatchHandler.class);
 
     private final DispatchGameMessageService dispatchGameMessageService;
+    private final DispatchUserEventService dispatchUserEventService;
     private final PlayerDao playerDao;
     private Player player;
 
-    public GameBusinessMessageDispatchHandler(DispatchGameMessageService dispatchGameMessageService, PlayerDao playerDao) {
+    public GameBusinessMessageDispatchHandler(
+            DispatchGameMessageService dispatchGameMessageService,
+            DispatchUserEventService dispatchUserEventService,
+            PlayerDao playerDao) {
         this.dispatchGameMessageService = dispatchGameMessageService;
+        this.dispatchUserEventService = dispatchUserEventService;
         this.playerDao = playerDao;
     }
 
@@ -62,9 +69,10 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
     @Override
     public void userEventTriggered(AbstractGameChannelHandlerContext ctx, Object evt, Promise<Object> promise) throws Exception {
         if (evt instanceof IdleStateEvent) { // 处理GameChannel空闲事件
-            logger.debug("收到空闲事件：{}", evt.getClass().getName());
-            // Channel空闲时，关闭Channel。会自动清理GameChannel的缓存
-            ctx.close();
+//            logger.debug("收到空闲事件：{}", evt.getClass().getName());
+//            ctx.close();
+            UserEventContext utx = new UserEventContext(ctx);
+            dispatchUserEventService.callMethod(utx, evt, promise);
         } else if (evt instanceof GetPlayerInfoEvent) { // 处理获取用户信息事件
             GetPlayerByIdMsgResponse response = new GetPlayerByIdMsgResponse();
             response.getBodyObj().setPlayerId(this.player.getPlayerId());
