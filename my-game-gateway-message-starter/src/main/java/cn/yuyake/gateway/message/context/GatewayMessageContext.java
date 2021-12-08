@@ -5,6 +5,9 @@ import cn.yuyake.game.common.GameMessageHeader;
 import cn.yuyake.game.common.IGameMessage;
 import cn.yuyake.game.messagedispatcher.IGameChannelContext;
 import cn.yuyake.gateway.message.channel.GameChannel;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.Promise;
 
 public class GatewayMessageContext implements IGameChannelContext {
     private Player player;
@@ -52,5 +55,14 @@ public class GatewayMessageContext implements IGameChannelContext {
     @Override
     public long getPlayerId() {
         return this.requestMessage.getHeader().getPlayerId();
+    }
+
+    public Future<Object> sendUserEvent(Object event, Promise<Object> promise, long playerId) {
+        this.gameChannel.getEventDispatchService().fireUserEvent(playerId, event, promise);
+        return promise;
+    }
+
+    public DefaultPromise<Object> newPromise() {
+        return new DefaultPromise<>(this.gameChannel.executor());
     }
 }

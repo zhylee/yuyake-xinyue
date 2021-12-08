@@ -130,4 +130,8 @@ public class GameChannel {
     protected void unsafeClose() {
         this.gameChannelService.fireInactiveChannel(playerId);
     }
+
+    public GameMessageEventDispatchService getEventDispatchService() {
+        return this.gameChannelService;
+    }
 }

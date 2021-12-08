@@ -14,7 +14,7 @@ public class Player {
     private String nickName;
     private long lastLoginTime;
     private long createTime;
-
+    private Map<String, String> heroes = new HashMap<>();
     private Map<String, Integer> map = new HashMap<>();
 
     public long getPlayerId() {
@@ -47,6 +47,14 @@ public class Player {
 
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
+    }
+
+    public Map<String, String> getHeroes() {
+        return heroes;
+    }
+
+    public void setHeroes(Map<String, String> heroes) {
+        this.heroes = heroes;
     }
 
     public Map<String, Integer> getMap() {
