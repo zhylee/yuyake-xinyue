@@ -14,6 +14,8 @@ public class ServerConfig {
     private String businessGameMessageTopic = "business-game-message-topic";
     // 网关接收消息监听的topic
     private String gatewayGameMessageTopic = "gateway-game-message-topic";
+    // db处理线程数
+    private int dbThreads = 16;
 
     public int getServiceId() {
         return serviceId;
@@ -45,5 +47,13 @@ public class ServerConfig {
 
     public void setGatewayGameMessageTopic(String gatewayGameMessageTopic) {
         this.gatewayGameMessageTopic = gatewayGameMessageTopic;
+    }
+
+    public int getDbThreads() {
+        return dbThreads;
+    }
+
+    public void setDbThreads(int dbThreads) {
+        this.dbThreads = dbThreads;
     }
 }

@@ -1,6 +1,6 @@
 package cn.yuyake.xinyue.common;
 
-import cn.yuyake.dao.PlayerDao;
+import cn.yuyake.dao.AsyncPlayerDao;
 import cn.yuyake.db.entity.Player;
 import cn.yuyake.game.common.IGameMessage;
 import cn.yuyake.game.message.xinyue.GetPlayerByIdMsgResponse;
@@ -13,25 +13,30 @@ import cn.yuyake.gateway.message.context.GatewayMessageContext;
 import cn.yuyake.gateway.message.context.UserEventContext;
 import cn.yuyake.xinyue.logic.event.GetPlayerInfoEvent;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class GameBusinessMessageDispatchHandler implements GameChannelInboundHandler {
     private static final Logger logger = LoggerFactory.getLogger(GameBusinessMessageDispatchHandler.class);
 
     private final DispatchGameMessageService dispatchGameMessageService;
     private final DispatchUserEventService dispatchUserEventService;
-    private final PlayerDao playerDao;
+    // private final PlayerDao playerDao;
+    private final AsyncPlayerDao playerDao;
     private Player player;
 
     public GameBusinessMessageDispatchHandler(
             DispatchGameMessageService dispatchGameMessageService,
             DispatchUserEventService dispatchUserEventService,
-            PlayerDao playerDao) {
+            AsyncPlayerDao playerDao) {
         this.dispatchGameMessageService = dispatchGameMessageService;
         this.dispatchUserEventService = dispatchUserEventService;
         this.playerDao = playerDao;
@@ -39,13 +44,16 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
 
     @Override // 在用户GameChannel注册的时候，对用户的数据进行初始化
     public void channelRegister(AbstractGameChannelHandlerContext ctx, long playerId, GameChannelPromise promise) {
-        player = playerDao.findById(playerId).orElse(null);
-        if (player == null) {
-            logger.error("player {} 不存在", playerId);
-            promise.setFailure(new IllegalArgumentException("找不到Player数据，playerId：" + playerId));
-        } else {
-            promise.setSuccess();
-        }
+        playerDao.findPlayer(playerId, new DefaultPromise<>(ctx.executor())).addListener((GenericFutureListener<Future<Optional<Player>>>) future -> {
+            Optional<Player> playerOp = future.get();
+            if (playerOp.isPresent()) { // 如果查询成功，缓存player信息
+                player = playerOp.get();
+                promise.setSuccess();
+            } else { // 查询失败则返回异常
+                logger.error("player {} 不存在", playerId);
+                promise.setFailure(new IllegalArgumentException("找不到Player数据，playerId：" + playerId));
+            }
+        });
     }
 
     @Override
@@ -69,8 +77,6 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
     @Override
     public void userEventTriggered(AbstractGameChannelHandlerContext ctx, Object evt, Promise<Object> promise) throws Exception {
         if (evt instanceof IdleStateEvent) { // 处理GameChannel空闲事件
-//            logger.debug("收到空闲事件：{}", evt.getClass().getName());
-//            ctx.close();
             UserEventContext utx = new UserEventContext(ctx);
             dispatchUserEventService.callMethod(utx, evt, promise);
         } else if (evt instanceof GetPlayerInfoEvent) { // 处理获取用户信息事件

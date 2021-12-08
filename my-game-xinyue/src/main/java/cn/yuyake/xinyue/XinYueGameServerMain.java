@@ -1,6 +1,6 @@
 package cn.yuyake.xinyue;
 
-import cn.yuyake.dao.PlayerDao;
+import cn.yuyake.dao.AsyncPlayerDao;
 import cn.yuyake.game.messagedispatcher.DispatchGameMessageService;
 import cn.yuyake.gateway.message.context.DispatchUserEventService;
 import cn.yuyake.gateway.message.context.GatewayMessageConsumerService;
@@ -25,7 +25,7 @@ public class XinYueGameServerMain {
         // 获取网关消息监听实例
         GatewayMessageConsumerService gatewayMessageConsumerService = context.getBean(GatewayMessageConsumerService.class);
         // 获取Player数据操作类实例
-        PlayerDao playerDao = context.getBean(PlayerDao.class);
+        AsyncPlayerDao playerDao = context.getBean(AsyncPlayerDao.class);
         DispatchGameMessageService dispatchGameMessageService = context.getBean(DispatchGameMessageService.class);
         DispatchUserEventService dispatchUserEventService = context.getBean(DispatchUserEventService.class);
         gatewayMessageConsumerService.start((gameChannel) -> {
