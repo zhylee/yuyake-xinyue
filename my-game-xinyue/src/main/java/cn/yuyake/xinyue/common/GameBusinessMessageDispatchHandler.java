@@ -8,6 +8,7 @@ import cn.yuyake.gateway.message.channel.AbstractGameChannelHandlerContext;
 import cn.yuyake.gateway.message.channel.GameChannelInboundHandler;
 import cn.yuyake.gateway.message.channel.GameChannelPromise;
 import cn.yuyake.gateway.message.context.GatewayMessageContext;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,10 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
 
     @Override
     public void userEventTriggered(AbstractGameChannelHandlerContext ctx, Object evt, Promise<Object> promise) throws Exception {
-
+        if (evt instanceof IdleStateEvent) {
+            logger.debug("收到空闲事件：{}", evt.getClass().getName());
+            // Channel空闲时，关闭Channel。会自动清理GameChannel的缓存
+            ctx.close();
+        }
     }
 }

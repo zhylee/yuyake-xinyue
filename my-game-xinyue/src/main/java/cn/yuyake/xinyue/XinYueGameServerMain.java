@@ -4,6 +4,7 @@ import cn.yuyake.dao.PlayerDao;
 import cn.yuyake.game.messagedispatcher.DispatchGameMessageService;
 import cn.yuyake.gateway.message.context.GatewayMessageConsumerService;
 import cn.yuyake.gateway.message.context.ServerConfig;
+import cn.yuyake.gateway.message.handler.GameChannelIdleStateHandler;
 import cn.yuyake.xinyue.common.GameBusinessMessageDispatchHandler;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,6 +27,8 @@ public class XinYueGameServerMain {
         PlayerDao playerDao = context.getBean(PlayerDao.class);
         DispatchGameMessageService dispatchGameMessageService = context.getBean(DispatchGameMessageService.class);
         gatewayMessageConsumerService.start((gameChannel) -> {
+            // 初始化channel
+            gameChannel.getChannelPipeline().addLast(new GameChannelIdleStateHandler(60, 60, 50));
             // 启动网关监听，并初始化GameChanelHandler
             gameChannel.getChannelPipeline().addLast(new GameBusinessMessageDispatchHandler(dispatchGameMessageService, playerDao));
         });

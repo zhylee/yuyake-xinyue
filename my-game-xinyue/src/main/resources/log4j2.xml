@@ -12,7 +12,7 @@
     <Loggers>
         <logger name="org.apache.http.impl" level="info" additivity="false">
         </logger>
-        <logger name="cn.yuyake.gateway" level="debug" additivity="false">
+        <logger name="cn.yuyake.xinyue" level="debug" additivity="false">
             <!-- 输出日志到控制台 -->
             <appender-ref ref="console"/>
         </logger>

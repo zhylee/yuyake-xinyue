@@ -2,6 +2,7 @@ package cn.yuyake.gateway.message.channel;
 
 import cn.yuyake.game.common.IGameMessage;
 import io.netty.channel.DefaultChannelPipeline;
+import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Promise;
 import io.netty.util.internal.ObjectUtil;
@@ -186,6 +187,21 @@ public abstract class AbstractGameChannelHandlerContext {
         return this;
     }
 
+    public GameChannelFuture close() {
+        return this.close(new DefaultGameChannelPromise(this.gameChannel()));
+    }
+
+    public GameChannelFuture close(final GameChannelPromise promise) {
+        final AbstractGameChannelHandlerContext next = findContextOutbound();
+        EventExecutor executor = next.executor();
+        if (executor.inEventLoop()) {
+            next.invokeClose(promise);
+        } else {
+            safeExecute(executor, () -> next.invokeClose(promise), promise, null);
+        }
+        return promise;
+    }
+
     public abstract GameChannelHandler handler();
 
     public GameChannelPromise newPromise() {
@@ -249,6 +265,30 @@ public abstract class AbstractGameChannelHandlerContext {
             } else if (logger.isWarnEnabled()) {
                 logger.warn("An exception '{}' [enable DEBUG level for full stacktrace] " + "was thrown by a user handler's exceptionCaught() " + "method while handling the following exception:", error, cause);
             }
+        }
+    }
+
+    private void invokeClose(GameChannelPromise promise) {
+        try {
+            ((GameChannelOutboundHandler) handler()).close(this, promise);
+        } catch (Throwable t) {
+            notifyOutboundHandlerException(t, promise);
+        }
+    }
+
+    private static boolean safeExecute(EventExecutor executor, Runnable runnable, GameChannelPromise promise, Object msg) {
+        try {
+            executor.execute(runnable);
+            return true;
+        } catch (Throwable cause) {
+            try {
+                promise.setFailure(cause);
+            } finally {
+                if (msg != null) {
+                    ReferenceCountUtil.release(msg);
+                }
+            }
+            return false;
         }
     }
 }
