@@ -16,6 +16,8 @@ public class ServerConfig {
     private String gatewayGameMessageTopic = "gateway-game-message-topic";
     // db处理线程数
     private int dbThreads = 16;
+    private int flushRedisDelaySecond = 60;
+    private int flushDBDelaySecond = 300;
 
     public int getServiceId() {
         return serviceId;
@@ -55,5 +57,21 @@ public class ServerConfig {
 
     public void setDbThreads(int dbThreads) {
         this.dbThreads = dbThreads;
+    }
+
+    public int getFlushRedisDelaySecond() {
+        return flushRedisDelaySecond;
+    }
+
+    public void setFlushRedisDelaySecond(int flushRedisDelaySecond) {
+        this.flushRedisDelaySecond = flushRedisDelaySecond;
+    }
+
+    public int getFlushDBDelaySecond() {
+        return flushDBDelaySecond;
+    }
+
+    public void setFlushDBDelaySecond(int flushDBDelaySecond) {
+        this.flushDBDelaySecond = flushDBDelaySecond;
     }
 }

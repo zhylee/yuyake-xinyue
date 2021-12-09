@@ -48,11 +48,11 @@ public abstract class AbstractDao<Entity, ID> {
                     } else {
                         this.setRedisDefaultValue(key);// 设置默认值，防止缓存穿透
                     }
-                } else if(value.equals(RedisDefaultValue)) {
+                } else if (value.equals(RedisDefaultValue)) {
                     value = null; // 如果取出来的是默认值，还是返回空
                 }
             }
-        } else if(value.equals(RedisDefaultValue)) {
+        } else if (value.equals(RedisDefaultValue)) {
             value = null; // 如果取出来的是默认值，还是返回空
         }
         if (value != null) {
@@ -64,7 +64,7 @@ public abstract class AbstractDao<Entity, ID> {
     // 设置默认值
     private void setRedisDefaultValue(String key) {
         Duration duration = Duration.ofMinutes(1);
-        redisTemplate.opsForValue().set(key, RedisDefaultValue,duration);
+        redisTemplate.opsForValue().set(key, RedisDefaultValue, duration);
     }
 
     // 更新数据到 redis 缓存中
@@ -86,4 +86,11 @@ public abstract class AbstractDao<Entity, ID> {
         this.getMongoRepository().save(entity);
     }
 
+    public void saveOrUpdateToDB(Entity entity) {
+        this.getMongoRepository().save(entity);
+    }
+
+    public void saveOrUpdateToRedis(Entity entity, ID id) {
+        this.updateRedis(entity, id);
+    }
 }

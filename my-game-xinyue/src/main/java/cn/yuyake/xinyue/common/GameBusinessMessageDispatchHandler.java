@@ -10,33 +10,37 @@ import cn.yuyake.gateway.message.channel.GameChannelInboundHandler;
 import cn.yuyake.gateway.message.channel.GameChannelPromise;
 import cn.yuyake.gateway.message.context.DispatchUserEventService;
 import cn.yuyake.gateway.message.context.GatewayMessageContext;
+import cn.yuyake.gateway.message.context.ServerConfig;
 import cn.yuyake.gateway.message.context.UserEventContext;
 import cn.yuyake.xinyue.logic.event.GetPlayerInfoEvent;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.concurrent.DefaultPromise;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.concurrent.Promise;
+import io.netty.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public class GameBusinessMessageDispatchHandler implements GameChannelInboundHandler {
     private static final Logger logger = LoggerFactory.getLogger(GameBusinessMessageDispatchHandler.class);
 
     private final DispatchGameMessageService dispatchGameMessageService;
     private final DispatchUserEventService dispatchUserEventService;
+    private final ServerConfig serverConfig;
     // private final PlayerDao playerDao;
     private final AsyncPlayerDao playerDao;
     private Player player;
+    private ScheduledFuture<?> flushToRedisScheduleFuture;
+    private ScheduledFuture<?> flushToDBScheduleFuture;
 
     public GameBusinessMessageDispatchHandler(
+            ServerConfig serverConfig,
             DispatchGameMessageService dispatchGameMessageService,
             DispatchUserEventService dispatchUserEventService,
             AsyncPlayerDao playerDao) {
+        this.serverConfig = serverConfig;
         this.dispatchGameMessageService = dispatchGameMessageService;
         this.dispatchUserEventService = dispatchUserEventService;
         this.playerDao = playerDao;
@@ -49,6 +53,8 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
             if (playerOp.isPresent()) { // 如果查询成功，缓存player信息
                 player = playerOp.get();
                 promise.setSuccess();
+                // 启动定时持久化数据到数据库
+                fixTimerFlushPlayer(ctx);
             } else { // 查询失败则返回异常
                 logger.error("player {} 不存在", playerId);
                 promise.setFailure(new IllegalArgumentException("找不到Player数据，playerId：" + playerId));
@@ -63,7 +69,21 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
 
     @Override
     public void channelInactive(AbstractGameChannelHandlerContext ctx) throws Exception {
+        // 取消DB持久化定时器
+        if (flushToDBScheduleFuture != null) {
+            // 这里使用参数true，是要打断里面要执行的任务，通过下面的强制方法更新数据
+            flushToDBScheduleFuture.cancel(true);
+        }
+        // 取消Redis持久化定时器
+        if (flushToRedisScheduleFuture != null) {
+            flushToRedisScheduleFuture.cancel(true);
+        }
+        // GameChannel移除的时候，强制更新一次数据
+        this.playerDao.syncFlushPlayer(player);
+        logger.debug("强制flush player {} 成功", player.getPlayerId());
         logger.debug("game channel 移除，playerId：{}", ctx.gameChannel().getPlayerId());
+        // 向下一个Handler发送channel失效事件
+        ctx.fireChannelInactive();
     }
 
     @Override
@@ -91,5 +111,45 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
             response.getBodyObj().setHeroes(heroes);
             promise.setSuccess(response);
         }
+    }
+
+    private void fixTimerFlushPlayer(AbstractGameChannelHandlerContext ctx) {
+        // 获取定时器执行的延迟时间，单位是秒
+        int flushRedisDelay = serverConfig.getFlushRedisDelaySecond();
+        int flushDBDelay = serverConfig.getFlushDBDelaySecond();
+        // 创建持久化数据到redis的定时任务
+        flushToRedisScheduleFuture = ctx.executor().scheduleWithFixedDelay(() -> {
+            // 任务开始执行的时间
+            long start = System.currentTimeMillis();
+            Promise<Boolean> promise = new DefaultPromise<>(ctx.executor());
+            playerDao.saveOrUpdatePlayerToRedis(player, promise).addListener((GenericFutureListener<Future<Boolean>>) future -> {
+                if (future.isSuccess()) {
+                    if (logger.isDebugEnabled()) {
+                        long end = System.currentTimeMillis();
+                        logger.debug("player {} 同步数据到redis成功，耗时：{} ms", player.getPlayerId(), (end - start));
+                    }
+                } else {
+                    logger.error("player {} 同步数据到Redis失败", player.getPlayerId());
+                    // 这个时候应该报警
+                }
+            });
+        }, flushRedisDelay, flushRedisDelay, TimeUnit.SECONDS);
+        // 创建持久化数据到db的定时任务
+        flushToDBScheduleFuture = ctx.executor().scheduleWithFixedDelay(() -> {
+            // 任务开始执行时间
+            long start = System.currentTimeMillis();
+            Promise<Boolean> promise = new DefaultPromise<>(ctx.executor());
+            playerDao.saveOrUpdatePlayerToDB(player, promise).addListener((GenericFutureListener<Future<Boolean>>) future -> {
+                if (future.isSuccess()) {
+                    if (logger.isDebugEnabled()) {
+                        long end = System.currentTimeMillis();
+                        logger.debug("player {} 同步数据到MongoDB成功，耗时：{} ms", player.getPlayerId(), (end - start));
+                    }
+                } else {
+                    logger.error("player {} 同步数据到MongoDB失败", player.getPlayerId());
+                    // 这个时候应该报警，将数据同步到日志中，以待恢复
+                }
+            });
+        }, flushDBDelay, flushDBDelay, TimeUnit.SECONDS);
     }
 }

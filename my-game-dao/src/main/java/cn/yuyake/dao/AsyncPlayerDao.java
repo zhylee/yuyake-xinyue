@@ -44,4 +44,30 @@ public class AsyncPlayerDao {
         });
         return promise;
     }
+
+    // 异步更新数据到数据库
+    public Promise<Boolean> saveOrUpdatePlayerToDB(Player player, Promise<Boolean> promise) {
+        this.execute(player.getPlayerId(), promise, () -> {
+            // 将更新操作封装为任务，放到数据操作线程中执行
+            playerDao.saveOrUpdateToDB(player);
+            // 更新成功
+            promise.setSuccess(true);
+        });
+        return promise;
+    }
+
+    // 异步更新数据到redis
+    public Promise<Boolean> saveOrUpdatePlayerToRedis(Player player, Promise<Boolean> promise) {
+        this.execute(player.getPlayerId(), promise, () -> {
+            // 将更新操作封装为任务，放到数据操作线程中执行
+            playerDao.saveOrUpdateToRedis(player, player.getPlayerId());
+            // 更新成功
+            promise.setSuccess(true);
+        });
+        return promise;
+    }
+
+    public void syncFlushPlayer(Player player) {
+        this.playerDao.saveOrUpdate(player, player.getPlayerId());
+    }
 }
