@@ -2,6 +2,7 @@ package cn.yuyake.xinyue.common;
 
 import cn.yuyake.dao.AsyncPlayerDao;
 import cn.yuyake.db.entity.Player;
+import cn.yuyake.db.entity.manager.PlayerManager;
 import cn.yuyake.game.common.IGameMessage;
 import cn.yuyake.game.message.xinyue.GetPlayerByIdMsgResponse;
 import cn.yuyake.game.messagedispatcher.DispatchGameMessageService;
@@ -32,6 +33,7 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
     // private final PlayerDao playerDao;
     private final AsyncPlayerDao playerDao;
     private Player player;
+    private PlayerManager playerManager;
     private ScheduledFuture<?> flushToRedisScheduleFuture;
     private ScheduledFuture<?> flushToDBScheduleFuture;
 
@@ -52,6 +54,7 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
             Optional<Player> playerOp = future.get();
             if (playerOp.isPresent()) { // 如果查询成功，缓存player信息
                 player = playerOp.get();
+                playerManager = new PlayerManager(player);
                 promise.setSuccess();
                 // 启动定时持久化数据到数据库
                 fixTimerFlushPlayer(ctx);
@@ -89,7 +92,7 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
     @Override
     public void channelRead(AbstractGameChannelHandlerContext ctx, Object msg) throws Exception {
         IGameMessage gameMessage = (IGameMessage) msg;
-        GatewayMessageContext stx = new GatewayMessageContext(player, gameMessage, ctx.gameChannel());
+        GatewayMessageContext stx = new GatewayMessageContext(playerManager, gameMessage, ctx.gameChannel());
         // 通过反射，调用处理客户端消息的方法
         dispatchGameMessageService.callMethod(gameMessage, stx);
     }

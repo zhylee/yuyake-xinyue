@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Document(collection = "Player")
 public class Player {
@@ -12,10 +13,14 @@ public class Player {
     @Id
     private long playerId;
     private String nickName;
+    private int level;
     private long lastLoginTime;
     private long createTime;
+    // 测试的时候使用
     private Map<String, String> heroes = new HashMap<>();
     private Map<String, Integer> map = new HashMap<>();
+    // 正式情况下，要使用线程安全的ConcurrentHashMap
+    private ConcurrentHashMap<String, Hero> heroMap = new ConcurrentHashMap<>();
 
     public long getPlayerId() {
         return playerId;
@@ -31,6 +36,14 @@ public class Player {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public long getLastLoginTime() {
@@ -63,5 +76,13 @@ public class Player {
 
     public void setMap(Map<String, Integer> map) {
         this.map = map;
+    }
+
+    public ConcurrentHashMap<String, Hero> getHeroMap() {
+        return heroMap;
+    }
+
+    public void setHeroMap(ConcurrentHashMap<String, Hero> heroMap) {
+        this.heroMap = heroMap;
     }
 }

@@ -1,6 +1,6 @@
 package cn.yuyake.gateway.message.context;
 
-import cn.yuyake.db.entity.Player;
+import cn.yuyake.db.entity.manager.PlayerManager;
 import cn.yuyake.game.common.GameMessageHeader;
 import cn.yuyake.game.common.IGameMessage;
 import cn.yuyake.game.messagedispatcher.IGameChannelContext;
@@ -10,13 +10,14 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
 
 public class GatewayMessageContext implements IGameChannelContext {
-    private Player player;
-    private IGameMessage requestMessage;
-    private GameChannel gameChannel;
+
+    private final IGameMessage requestMessage;
+    private final GameChannel gameChannel;
+    private final PlayerManager playerManager;
 
 
-    public GatewayMessageContext(Player player, IGameMessage requestMessage, GameChannel gameChannel) {
-        this.player = player;
+    public GatewayMessageContext(PlayerManager playerManager, IGameMessage requestMessage, GameChannel gameChannel) {
+        this.playerManager = playerManager;
         this.requestMessage = requestMessage;
         this.gameChannel = gameChannel;
     }
@@ -64,5 +65,9 @@ public class GatewayMessageContext implements IGameChannelContext {
 
     public DefaultPromise<Object> newPromise() {
         return new DefaultPromise<>(this.gameChannel.executor());
+    }
+
+    public PlayerManager getPlayerManager() {
+        return playerManager;
     }
 }
