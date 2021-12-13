@@ -25,7 +25,7 @@ public class PlayerServiceInstance implements ApplicationListener<GameChannelClo
     // 创建一个事件线程，操作redis的时候，使用异步
     private final EventExecutor eventExecutor = new DefaultEventExecutor();
 
-    @Override // TODO publish event
+    @Override
     public void onApplicationEvent(GameChannelCloseEvent event) {
         this.serviceInstanceMap.remove(event.getPlayerId());
     }

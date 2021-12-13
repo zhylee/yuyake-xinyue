@@ -9,17 +9,21 @@ import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
 
-public class GatewayMessageContext implements IGameChannelContext {
+public class GatewayMessageContext<T> implements IGameChannelContext {
 
     private final IGameMessage requestMessage;
     private final GameChannel gameChannel;
-    private final PlayerManager playerManager;
+    private final T dataManager;
 
 
-    public GatewayMessageContext(PlayerManager playerManager, IGameMessage requestMessage, GameChannel gameChannel) {
-        this.playerManager = playerManager;
+    public GatewayMessageContext(T dataManager, IGameMessage requestMessage, GameChannel gameChannel) {
+        this.dataManager = dataManager;
         this.requestMessage = requestMessage;
         this.gameChannel = gameChannel;
+    }
+
+    public T getDataManager() {
+        return dataManager;
     }
 
     @Override
@@ -44,8 +48,8 @@ public class GatewayMessageContext implements IGameChannelContext {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T getRequest() {
-        return (T) this.requestMessage;
+    public <E> E getRequest() {
+        return (E) this.requestMessage;
     }
 
     @Override
@@ -65,9 +69,5 @@ public class GatewayMessageContext implements IGameChannelContext {
 
     public DefaultPromise<Object> newPromise() {
         return new DefaultPromise<>(this.gameChannel.executor());
-    }
-
-    public PlayerManager getPlayerManager() {
-        return playerManager;
     }
 }

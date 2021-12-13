@@ -8,4 +8,5 @@ include 'my-game-gateway'
 include 'my-game-client'
 include 'my-game-xinyue'
 include 'my-game-gateway-message-starter'
+include 'my-game-arena'
 

@@ -92,7 +92,7 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
     @Override
     public void channelRead(AbstractGameChannelHandlerContext ctx, Object msg) throws Exception {
         IGameMessage gameMessage = (IGameMessage) msg;
-        GatewayMessageContext stx = new GatewayMessageContext(playerManager, gameMessage, ctx.gameChannel());
+        GatewayMessageContext<PlayerManager> stx = new GatewayMessageContext<>(playerManager, gameMessage, ctx.gameChannel());
         // 通过反射，调用处理客户端消息的方法
         dispatchGameMessageService.callMethod(gameMessage, stx);
     }
@@ -100,7 +100,7 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
     @Override
     public void userEventTriggered(AbstractGameChannelHandlerContext ctx, Object evt, Promise<Object> promise) throws Exception {
         if (evt instanceof IdleStateEvent) { // 处理GameChannel空闲事件
-            UserEventContext utx = new UserEventContext(ctx);
+            UserEventContext<PlayerManager> utx = new UserEventContext<>(playerManager, ctx);
             dispatchUserEventService.callMethod(utx, evt, promise);
         } else if (evt instanceof GetPlayerInfoEvent) { // 处理获取用户信息事件
             GetPlayerByIdMsgResponse response = new GetPlayerByIdMsgResponse();

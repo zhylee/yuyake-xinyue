@@ -10,6 +10,7 @@ public enum EnumRedisKey {
     PLAYER_ID_INCR(null),
     PLAYER_NICKNAME(null),
     PLAYER_INFO(Duration.ofDays(7)),
+    ARENA(Duration.ofDays(7)),
     ;
     // 此 key 的 value 的过期时间，如果为 null，表示 value 永远不过期
     private final Duration timeout;
