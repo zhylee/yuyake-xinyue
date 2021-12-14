@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 事件分发管理器
+ * 基于监听接口的事件分发管理器
  */
 public class EventDispatchManager {
     // 缓存监听的事件与事件监听器的映射，由于一个事件对应多个监听器，所以value是一个数组
