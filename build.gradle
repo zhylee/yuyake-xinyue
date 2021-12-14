@@ -8,9 +8,9 @@
 buildscript {
     // 定义公共版本号
     ext {
-        springBootVersion = "2.5.6"
-        springManagementVersion = "1.0.10.RELEASE"
-        springCloudVersion = "2020.0.4"
+        springBootVersion = "2.6.1"
+        springManagementVersion = "1.0.11.RELEASE"
+        springCloudVersion = "2021.0.0"
     }
     repositories {
         mavenCentral()
