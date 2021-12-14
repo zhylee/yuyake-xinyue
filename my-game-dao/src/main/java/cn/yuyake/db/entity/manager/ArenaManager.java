@@ -13,4 +13,9 @@ public class ArenaManager {
     public Arena getArena() {
         return arena;
     }
+
+    public void addChallengeTimes(int times) {
+        int result = arena.getChallengeTimes() + times;
+        arena.setChallengeTimes(result);
+    }
 }

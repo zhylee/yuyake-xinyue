@@ -7,24 +7,25 @@ import cn.yuyake.game.common.IGameMessage;
 import cn.yuyake.game.message.xinyue.GetPlayerByIdMsgResponse;
 import cn.yuyake.game.messagedispatcher.DispatchGameMessageService;
 import cn.yuyake.gateway.message.channel.AbstractGameChannelHandlerContext;
-import cn.yuyake.gateway.message.channel.GameChannelInboundHandler;
 import cn.yuyake.gateway.message.channel.GameChannelPromise;
 import cn.yuyake.gateway.message.context.DispatchUserEventService;
 import cn.yuyake.gateway.message.context.GatewayMessageContext;
 import cn.yuyake.gateway.message.context.ServerConfig;
 import cn.yuyake.gateway.message.context.UserEventContext;
+import cn.yuyake.gateway.message.handler.AbstractGameMessageDispatchHandler;
 import cn.yuyake.xinyue.logic.event.GetPlayerInfoEvent;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class GameBusinessMessageDispatchHandler implements GameChannelInboundHandler {
+public class GameBusinessMessageDispatchHandler extends AbstractGameMessageDispatchHandler<PlayerManager> {
     private static final Logger logger = LoggerFactory.getLogger(GameBusinessMessageDispatchHandler.class);
 
     private final DispatchGameMessageService dispatchGameMessageService;
@@ -38,10 +39,12 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
     private ScheduledFuture<?> flushToDBScheduleFuture;
 
     public GameBusinessMessageDispatchHandler(
+            ApplicationContext applicationContext,
             ServerConfig serverConfig,
             DispatchGameMessageService dispatchGameMessageService,
             DispatchUserEventService dispatchUserEventService,
             AsyncPlayerDao playerDao) {
+        super(applicationContext);
         this.serverConfig = serverConfig;
         this.dispatchGameMessageService = dispatchGameMessageService;
         this.dispatchUserEventService = dispatchUserEventService;
@@ -63,6 +66,26 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
                 promise.setFailure(new IllegalArgumentException("找不到Player数据，playerId：" + playerId));
             }
         });
+    }
+
+    @Override
+    protected PlayerManager getDataManager() {
+        return playerManager;
+    }
+
+    @Override
+    protected void initData(AbstractGameChannelHandlerContext ctx, long playerId, GameChannelPromise promise) {
+
+    }
+
+    @Override
+    protected Future<Boolean> updateToRedis(Promise<Boolean> promise) {
+        return null;
+    }
+
+    @Override
+    protected Future<Boolean> updateToDB(Promise<Boolean> promise) {
+        return null;
     }
 
     @Override
@@ -92,7 +115,7 @@ public class GameBusinessMessageDispatchHandler implements GameChannelInboundHan
     @Override
     public void channelRead(AbstractGameChannelHandlerContext ctx, Object msg) throws Exception {
         IGameMessage gameMessage = (IGameMessage) msg;
-        GatewayMessageContext<PlayerManager> stx = new GatewayMessageContext<>(playerManager, gameMessage, ctx.gameChannel());
+        GatewayMessageContext<PlayerManager> stx = new GatewayMessageContext<>(playerManager, gameMessage, ctx);
         // 通过反射，调用处理客户端消息的方法
         dispatchGameMessageService.callMethod(gameMessage, stx);
     }

@@ -139,6 +139,24 @@ public abstract class AbstractGameChannelHandlerContext {
         }
     }
 
+    static void invokeChannelReadRPCRequest(final AbstractGameChannelHandlerContext next, IGameMessage msg) {
+        ObjectUtil.checkNotNull(msg, "msg");
+        EventExecutor executor = next.executor();
+        if (executor.inEventLoop()) {
+            next.invokeChannelReadRPCRequest(msg);
+        } else {
+            executor.execute(() -> next.invokeChannelReadRPCRequest(msg));
+        }
+    }
+
+    private void invokeChannelReadRPCRequest(IGameMessage msg) {
+        try {
+            ((GameChannelInboundHandler) handler()).channelReadRPCRequest(this, msg);
+        } catch (Throwable t) {
+            notifyHandlerException(t);
+        }
+    }
+
     private void invokeWrite(IGameMessage msg, GameChannelPromise promise) {
         try {
             ((GameChannelOutboundHandler) handler()).writeAndFlush(this, msg, promise);
@@ -160,6 +178,28 @@ public abstract class AbstractGameChannelHandlerContext {
 
     public GameChannelFuture writeAndFlush(IGameMessage msg) {
         return writeAndFlush(msg, newPromise());
+    }
+
+    public void writeRPCMessage(IGameMessage msg, Promise<IGameMessage> promise) {
+        // 查找Handler上下文
+        AbstractGameChannelHandlerContext next = findContextOutbound();
+        EventExecutor executor = next.executor();
+        if (executor.inEventLoop()) {
+            // 如果和当前线程是同一个线程，则直接执行操作
+            next.invokeWriteRPCMessage(msg, promise);
+        } else {
+            // 如果不是同一个线程，则封装为任务事件，放到下一个上下文指定的线程中执行
+            executor.execute(() -> next.invokeWriteRPCMessage(msg, promise));
+        }
+    }
+
+    private void invokeWriteRPCMessage(IGameMessage msg, Promise<IGameMessage> callback) {
+        try {
+            // 调用Handler的方法
+            ((GameChannelOutboundHandler) handler()).writeRPCMessage(this, msg, callback);
+        } catch (Throwable t) {
+            notifyOutboundHandlerException(t, callback);
+        }
     }
 
     public AbstractGameChannelHandlerContext fireExceptionCaught(final Throwable cause) {
@@ -290,5 +330,10 @@ public abstract class AbstractGameChannelHandlerContext {
             }
             return false;
         }
+    }
+
+    public AbstractGameChannelHandlerContext fireChannelReadRPCRequest(final IGameMessage msg) {
+        invokeChannelReadRPCRequest(findContextInbound(), msg);
+        return this;
     }
 }

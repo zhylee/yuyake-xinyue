@@ -28,6 +28,6 @@ public class ArenaMain {
             // 初始化channel
             gameChannel.getChannelPipeline().addLast(new GameChannelIdleStateHandler(120, 120, 100));
             gameChannel.getChannelPipeline().addLast(new ArenaGatewayHandler(context));
-        });
+        }, serverConfig.getServerId());
     }
 }

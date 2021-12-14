@@ -143,6 +143,11 @@ public class GameChannelIdleStateHandler implements GameChannelInboundHandler, G
     }
 
     @Override
+    public void channelReadRPCRequest(AbstractGameChannelHandlerContext ctx, IGameMessage msg) throws Exception {
+        ctx.fireChannelReadRPCRequest(msg);
+    }
+
+    @Override
     public void userEventTriggered(AbstractGameChannelHandlerContext ctx, Object evt, Promise<Object> promise) throws Exception {
         ctx.fireUserEventTriggered(evt, promise);
     }
@@ -154,6 +159,11 @@ public class GameChannelIdleStateHandler implements GameChannelInboundHandler, G
         }
         // 注意，这句不能少，少了的话消息会发不出去
         ctx.writeAndFlush(msg, promise);
+    }
+
+    @Override
+    public void writeRPCMessage(AbstractGameChannelHandlerContext ctx, IGameMessage gameMessage, Promise<IGameMessage> callback) {
+        ctx.writeRPCMessage(gameMessage, callback);
     }
 
     @Override

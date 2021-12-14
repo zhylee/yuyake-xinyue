@@ -76,7 +76,7 @@ public class GameMessageService {
     }
 
     // 获取数据反序列化的对象实例
-    private IGameMessage getMessageInstance(EnumMessageType messageType, int messageId) {
+    public IGameMessage getMessageInstance(EnumMessageType messageType, int messageId) {
         String key = this.getMessageClassCacheKey(messageType, messageId);
         Class<? extends IGameMessage> clazz = this.gameMessageClassMap.get(key);
         if (clazz == null) {

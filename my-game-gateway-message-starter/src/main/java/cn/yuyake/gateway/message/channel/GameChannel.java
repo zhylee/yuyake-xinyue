@@ -1,8 +1,10 @@
 package cn.yuyake.gateway.message.channel;
 
+import cn.yuyake.game.common.EnumMessageType;
 import cn.yuyake.game.common.GameMessagePackage;
 import cn.yuyake.game.common.IGameMessage;
 import cn.yuyake.gateway.message.context.ServerConfig;
+import cn.yuyake.gateway.message.rpc.GameRpcService;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Promise;
 import org.slf4j.Logger;
@@ -25,6 +27,8 @@ public class GameChannel {
     private final GameChannelPipeline channelPipeline;
     // 事件分发管理器
     private final GameMessageEventDispatchService gameChannelService;
+    // RPC服务
+    private final GameRpcService gameRpcSendFactory;
     // 标记GameChannel是否注册成功
     private volatile boolean registered;
     // 事件等待队列，如果GameChannel还没有注册成功，这个时候又有新的消息过来了，就让事件在这个队列中等待
@@ -33,12 +37,13 @@ public class GameChannel {
     private int gatewayServerId;
     private final ServerConfig serverConfig;
 
-    public GameChannel(long playerId, GameMessageEventDispatchService gameChannelService, IMessageSendFactory messageSendFactory) {
+    public GameChannel(long playerId, GameMessageEventDispatchService gameChannelService, IMessageSendFactory messageSendFactory, GameRpcService gameRpcSendFactory) {
         this.playerId = playerId;
         this.gameChannelService = gameChannelService;
         this.messageSendFactory = messageSendFactory;
         this.channelPipeline = new GameChannelPipeline(this);
         this.serverConfig = gameChannelService.getApplicationContext().getBean(ServerConfig.class);
+        this.gameRpcSendFactory = gameRpcSendFactory;
     }
 
     public ServerConfig getServerConfig() {
@@ -127,11 +132,25 @@ public class GameChannel {
         }
     }
 
+    protected void unsafeSendRpcMessage(IGameMessage gameMessage, Promise<IGameMessage> callback) {
+        if (gameMessage.getHeader().getMessageType() == EnumMessageType.RPC_REQUEST) {
+            this.gameRpcSendFactory.sendRPCRequest(gameMessage, callback);
+        } else if (gameMessage.getHeader().getMessageType() == EnumMessageType.RPC_RESPONSE) {
+            this.gameRpcSendFactory.sendRPCResponse(gameMessage);
+        }
+    }
+
     protected void unsafeClose() {
         this.gameChannelService.fireInactiveChannel(playerId);
     }
 
     public GameMessageEventDispatchService getEventDispatchService() {
         return this.gameChannelService;
+    }
+
+    public void fireChannelReadRPCRequest(IGameMessage gameMessage) {
+        this.safeExecute(() -> {
+            this.channelPipeline.fireChannelReadRPCRequest(gameMessage);
+        });
     }
 }

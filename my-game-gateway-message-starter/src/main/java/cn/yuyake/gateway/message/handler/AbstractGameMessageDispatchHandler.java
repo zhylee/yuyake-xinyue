@@ -9,6 +9,8 @@ import cn.yuyake.gateway.message.context.DispatchUserEventService;
 import cn.yuyake.gateway.message.context.GatewayMessageContext;
 import cn.yuyake.gateway.message.context.ServerConfig;
 import cn.yuyake.gateway.message.context.UserEventContext;
+import cn.yuyake.gateway.message.rpc.DispatchRPCEventService;
+import cn.yuyake.gateway.message.rpc.RPCEventContext;
 import io.netty.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ public abstract class AbstractGameMessageDispatchHandler<T> implements GameChann
 
     private final DispatchGameMessageService dispatchGameMessageService;
     private final DispatchUserEventService dispatchUserEventService;
+    private final DispatchRPCEventService dispatchRPCEventService;
     private final ServerConfig serverConfig;
     private ScheduledFuture<?> flushToRedisScheduleFuture;
     private ScheduledFuture<?> flushToDBScheduleFuture;
@@ -31,6 +34,7 @@ public abstract class AbstractGameMessageDispatchHandler<T> implements GameChann
     public AbstractGameMessageDispatchHandler(ApplicationContext applicationContext) {
         this.dispatchGameMessageService = applicationContext.getBean(DispatchGameMessageService.class);
         this.dispatchUserEventService = applicationContext.getBean(DispatchUserEventService.class);
+        this.dispatchRPCEventService = applicationContext.getBean(DispatchRPCEventService.class);
         this.serverConfig = applicationContext.getBean(ServerConfig.class);
         logger = LoggerFactory.getLogger(this.getClass());
     }
@@ -85,7 +89,7 @@ public abstract class AbstractGameMessageDispatchHandler<T> implements GameChann
     public void channelRead(AbstractGameChannelHandlerContext ctx, Object msg) throws Exception {
         IGameMessage gameMessage = (IGameMessage) msg;
         T dataManager = this.getDataManager();
-        GatewayMessageContext<T> stx = new GatewayMessageContext<>(dataManager, gameMessage, ctx.gameChannel());
+        GatewayMessageContext<T> stx = new GatewayMessageContext<>(dataManager, gameMessage, ctx);
         dispatchGameMessageService.callMethod(gameMessage, stx);
     }
 
@@ -94,6 +98,13 @@ public abstract class AbstractGameMessageDispatchHandler<T> implements GameChann
         T data = this.getDataManager();
         UserEventContext<T> utx = new UserEventContext<>(data, ctx);
         dispatchUserEventService.callMethod(utx, evt, promise);
+    }
+
+    @Override
+    public void channelReadRPCRequest(AbstractGameChannelHandlerContext ctx, IGameMessage msg) throws Exception {
+        T data = this.getDataManager();
+        RPCEventContext<T> rpcEventContext = new RPCEventContext<>(data, msg, ctx);
+        this.dispatchRPCEventService.callMethod(rpcEventContext, msg);
     }
 
     private void fixTimerFlushPlayer(AbstractGameChannelHandlerContext ctx) {

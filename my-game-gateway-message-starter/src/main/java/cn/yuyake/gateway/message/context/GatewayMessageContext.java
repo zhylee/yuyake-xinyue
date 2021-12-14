@@ -1,10 +1,9 @@
 package cn.yuyake.gateway.message.context;
 
-import cn.yuyake.db.entity.manager.PlayerManager;
 import cn.yuyake.game.common.GameMessageHeader;
 import cn.yuyake.game.common.IGameMessage;
 import cn.yuyake.game.messagedispatcher.IGameChannelContext;
-import cn.yuyake.gateway.message.channel.GameChannel;
+import cn.yuyake.gateway.message.channel.AbstractGameChannelHandlerContext;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
@@ -12,14 +11,14 @@ import io.netty.util.concurrent.Promise;
 public class GatewayMessageContext<T> implements IGameChannelContext {
 
     private final IGameMessage requestMessage;
-    private final GameChannel gameChannel;
+    private final AbstractGameChannelHandlerContext ctx;
     private final T dataManager;
 
 
-    public GatewayMessageContext(T dataManager, IGameMessage requestMessage, GameChannel gameChannel) {
+    public GatewayMessageContext(T dataManager, IGameMessage requestMessage, AbstractGameChannelHandlerContext ctx) {
         this.dataManager = dataManager;
         this.requestMessage = requestMessage;
-        this.gameChannel = gameChannel;
+        this.ctx = ctx;
     }
 
     public T getDataManager() {
@@ -30,7 +29,25 @@ public class GatewayMessageContext<T> implements IGameChannelContext {
     public void sendMessage(IGameMessage response) {
         if (response != null) {
             wrapResponseMessage(response);
-            gameChannel.getChannelPipeline().writeAndFlush(response);
+            this.ctx.writeAndFlush(response);
+        }
+    }
+
+    public Future<IGameMessage> sendRPCMessage(IGameMessage rpcRequest, Promise<IGameMessage> callback) {
+        if (rpcRequest != null) {
+            rpcRequest.getHeader().setPlayerId(ctx.gameChannel().getPlayerId());
+            this.ctx.writeRPCMessage(rpcRequest, callback);
+        } else {
+            throw new NullPointerException("RPC消息不能为空");
+        }
+        return callback;
+    }
+
+    public void sendRPCMessage(IGameMessage rpcRequest) {
+        if (rpcRequest != null) {
+            ctx.writeRPCMessage(rpcRequest, null);
+        } else {
+            throw new NullPointerException("RPC消息不能为空");
         }
     }
 
@@ -63,11 +80,15 @@ public class GatewayMessageContext<T> implements IGameChannelContext {
     }
 
     public Future<Object> sendUserEvent(Object event, Promise<Object> promise, long playerId) {
-        this.gameChannel.getEventDispatchService().fireUserEvent(playerId, event, promise);
+        this.ctx.gameChannel().getEventDispatchService().fireUserEvent(playerId, event, promise);
         return promise;
     }
 
-    public DefaultPromise<Object> newPromise() {
-        return new DefaultPromise<>(this.gameChannel.executor());
+    public <E> DefaultPromise<E> newPromise() {
+        return new DefaultPromise<>(this.ctx.executor());
+    }
+
+    public DefaultPromise<IGameMessage> newRPCPromise() {
+        return new DefaultPromise<>(this.ctx.executor());
     }
 }

@@ -32,7 +32,7 @@ public class XinYueGameServerMain {
             // 初始化channel
             gameChannel.getChannelPipeline().addLast(new GameChannelIdleStateHandler(60, 60, 50));
             // 启动网关监听，并初始化GameChanelHandler
-            gameChannel.getChannelPipeline().addLast(new GameBusinessMessageDispatchHandler(serverConfig, dispatchGameMessageService, dispatchUserEventService, playerDao));
-        });
+            gameChannel.getChannelPipeline().addLast(new GameBusinessMessageDispatchHandler(context, serverConfig, dispatchGameMessageService, dispatchUserEventService, playerDao));
+        }, serverConfig.getServerId());
     }
 }

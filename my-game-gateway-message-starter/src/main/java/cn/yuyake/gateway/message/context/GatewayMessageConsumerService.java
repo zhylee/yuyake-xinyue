@@ -1,9 +1,11 @@
 package cn.yuyake.gateway.message.context;
 
+import cn.yuyake.common.cloud.PlayerServiceInstance;
 import cn.yuyake.common.concurrent.GameEventExecutorGroup;
 import cn.yuyake.dao.PlayerDao;
 import cn.yuyake.game.GameMessageService;
 import cn.yuyake.game.bus.GameMessageInnerDecoder;
+import cn.yuyake.game.common.EnumMessageType;
 import cn.yuyake.game.common.GameMessageHeader;
 import cn.yuyake.game.common.GameMessagePackage;
 import cn.yuyake.game.common.IGameMessage;
@@ -11,6 +13,9 @@ import cn.yuyake.gateway.message.channel.GameChannelConfig;
 import cn.yuyake.gateway.message.channel.GameChannelInitializer;
 import cn.yuyake.gateway.message.channel.GameMessageEventDispatchService;
 import cn.yuyake.gateway.message.channel.IMessageSendFactory;
+import cn.yuyake.gateway.message.rpc.GameRpcService;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +37,10 @@ public class GatewayMessageConsumerService {
     private GameMessageEventDispatchService gameChannelService;
     // 业务处理的线程池
     private GameEventExecutorGroup workerGroup;
+    // RPC服务
+    private GameRpcService gameRpcSendFactory;
+    // RPC处理的线程池
+    private EventExecutorGroup rpcWorkerGroup = new DefaultEventExecutorGroup(2);
     @Autowired // GameChannel的一些配置信息
     private GameChannelConfig serverConfig;
     @Autowired // 消息管理类，负责管理根据消息id，获取对应的消息类实例
@@ -42,12 +51,15 @@ public class GatewayMessageConsumerService {
     private PlayerDao playerDao;
     @Autowired // 上下文
     private ApplicationContext context;
+    @Autowired
+    private PlayerServiceInstance playerServiceInstance;
 
     // 启动客户端消息处理，这里需要手动传进来处理消息的Handler
-    public void start(GameChannelInitializer gameChannelInitializer) {
+    public void start(GameChannelInitializer gameChannelInitializer, int localServerId) {
         workerGroup = new GameEventExecutorGroup(serverConfig.getWorkerThreads());
         gameGatewayMessageSendFactory = new GameGatewayMessageSendFactory(kafkaTemplate, serverConfig.getGatewayGameMessageTopic());
-        gameChannelService = new GameMessageEventDispatchService(context, workerGroup, gameGatewayMessageSendFactory, gameChannelInitializer);
+        gameRpcSendFactory = new GameRpcService(serverConfig.getRpcRequestGameMessageTopic(), serverConfig.getRpcResponseGameMessageTopic(), localServerId, playerServiceInstance, rpcWorkerGroup, kafkaTemplate);
+        gameChannelService = new GameMessageEventDispatchService(context, workerGroup, gameGatewayMessageSendFactory, gameRpcSendFactory, gameChannelInitializer);
     }
 
     // 指定监听的topic和组ID
@@ -63,5 +75,31 @@ public class GatewayMessageConsumerService {
         gameMessage.setHeader(header);
         // 发送到GameChannel中
         gameChannelService.fireReadMessage(header.getPlayerId(), gameMessage);
+    }
+
+    @KafkaListener(topics = {"${game.channel.rpc-request-game-message-topic}" + "-" + "${game.server.config.server-id}"}, groupId = "rpc-${game.channel.topic-group-id}")
+    public void consumeRPCRequestMessage(ConsumerRecord<String, byte[]> record) {
+        // 获取从消息总线服务中监听到的RPC请求消息
+        IGameMessage gameMessage = this.getGameMessage(EnumMessageType.RPC_REQUEST, record.value());
+        // 将收到的RPC请求消息发送到GameChannel中处理
+        gameChannelService.fireReadRPCRequest(gameMessage);
+    }
+
+    @KafkaListener(topics = {"${game.channel.rpc-response-game-message-topic}" + "-" + "${game.server.config.server-id}"}, groupId = "rpc-request-${game.channel.topic-group-id}")
+    public void consumeRPCResponseMessage(ConsumerRecord<String, byte[]> record) {
+        IGameMessage gameMessage = this.getGameMessage(EnumMessageType.RPC_RESPONSE, record.value());
+        this.gameRpcSendFactory.receiveResponse(gameMessage);
+    }
+
+    // 从接收到的数据流中反序列化消息
+    private IGameMessage getGameMessage(EnumMessageType messageType, byte[] data) {
+        GameMessagePackage gameMessagePackage = GameMessageInnerDecoder.readGameMessagePackage(data);
+        logger.debug("收到{}消息：{}", messageType, gameMessagePackage.getHeader());
+        GameMessageHeader header = gameMessagePackage.getHeader();
+        IGameMessage gameMessage = gameMessageService.getMessageInstance(messageType, header.getMessageId());
+        gameMessage.read(gameMessagePackage.getBody());
+        gameMessage.setHeader(header);
+        gameMessage.getHeader().setMessageType(messageType);
+        return gameMessage;
     }
 }

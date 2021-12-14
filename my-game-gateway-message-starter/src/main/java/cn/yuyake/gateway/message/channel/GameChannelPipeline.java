@@ -79,6 +79,12 @@ public class GameChannelPipeline {
         return this;
     }
 
+
+    public final GameChannelPipeline fireChannelReadRPCRequest(IGameMessage gameMessage) {
+        AbstractGameChannelHandlerContext.invokeChannelReadRPCRequest(head, gameMessage);
+        return this;
+    }
+
     // 发送写出事件，当消息发送成功时，需要调用promise.setSuccess()
     public final GameChannelFuture writeAndFlush(IGameMessage msg, GameChannelPromise promise) {
         return tail.writeAndFlush(msg, promise);
@@ -226,6 +232,11 @@ public class GameChannelPipeline {
         }
 
         @Override
+        public void writeRPCMessage(AbstractGameChannelHandlerContext ctx, IGameMessage gameMessage, Promise<IGameMessage> callback) {
+            channel.unsafeSendRpcMessage(gameMessage, callback);
+        }
+
+        @Override
         public void exceptionCaught(AbstractGameChannelHandlerContext ctx, Throwable cause) throws Exception {
             ctx.fireExceptionCaught(cause);
         }
@@ -238,6 +249,11 @@ public class GameChannelPipeline {
         @Override
         public void channelRead(AbstractGameChannelHandlerContext ctx, Object msg) throws Exception {
             ctx.fireChannelRead(msg);
+        }
+
+        @Override
+        public void channelReadRPCRequest(AbstractGameChannelHandlerContext ctx, IGameMessage msg) throws Exception {
+            ctx.fireChannelReadRPCRequest(msg);
         }
 
         @Override
@@ -288,6 +304,15 @@ public class GameChannelPipeline {
 
         @Override
         public void channelRead(AbstractGameChannelHandlerContext ctx, Object msg) throws Exception {
+            try {
+                logger.debug("Discarded inbound message {} that reached at the tail of the pipeline. " + "Please check your pipeline configuration.", msg);
+            } finally {
+                ReferenceCountUtil.release(msg);
+            }
+        }
+
+        @Override
+        public void channelReadRPCRequest(AbstractGameChannelHandlerContext ctx, IGameMessage msg) throws Exception {
             try {
                 logger.debug("Discarded inbound message {} that reached at the tail of the pipeline. " + "Please check your pipeline configuration.", msg);
             } finally {

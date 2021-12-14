@@ -1,6 +1,6 @@
 package cn.yuyake.xinyue.logic;
 
-import cn.yuyake.db.entity.Player;
+import cn.yuyake.db.entity.manager.PlayerManager;
 import cn.yuyake.game.message.xinyue.*;
 import cn.yuyake.game.messagedispatcher.GameMessageHandler;
 import cn.yuyake.game.messagedispatcher.GameMessageMapping;
@@ -15,7 +15,10 @@ import io.netty.util.concurrent.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @GameMessageHandler
@@ -23,7 +26,7 @@ public class PlayerLogicHandler {
     private final Logger logger = LoggerFactory.getLogger(PlayerLogicHandler.class);
 
     @GameMessageMapping(EnterGameMsgRequest.class) // 标记要处理的请求消息
-    public void enterGame(EnterGameMsgRequest request, GatewayMessageContext ctx) {
+    public void enterGame(EnterGameMsgRequest request, GatewayMessageContext<PlayerManager> ctx) {
         logger.info("接收到客户端进入游戏请求：{}", request.getHeader().getPlayerId());
         EnterGameMsgResponse response = new EnterGameMsgResponse();
         response.getBodyObj().setNickname("竹溪");
@@ -33,7 +36,7 @@ public class PlayerLogicHandler {
     }
 
     @GameMessageMapping(GetPlayerByIdMsgRequest.class)
-    public void getPlayerById(GetPlayerByIdMsgRequest request, GatewayMessageContext ctx) {
+    public void getPlayerById(GetPlayerByIdMsgRequest request, GatewayMessageContext<PlayerManager> ctx) {
         long playerId = request.getBodyObj().getPlayerId();
         // 创建一个Promise实例
         DefaultPromise<Object> promise = ctx.newPromise();
@@ -53,7 +56,7 @@ public class PlayerLogicHandler {
     }
 
     @GameMessageMapping(GetArenaPlayerListMsgRequest.class)
-    public void getArenaPlayerList(GetArenaPlayerListMsgRequest request, GatewayMessageContext ctx) {
+    public void getArenaPlayerList(GetArenaPlayerListMsgRequest request, GatewayMessageContext<PlayerManager> ctx) {
         // 获取本次要显示的PlayerId
         List<Long> playerIds = Arrays.asList(2L, 3L, 4L);// 模拟竞技场列表playerId
         List<GetArenaPlayerListMsgResponse.ArenaPlayer> arenaPlayers = new ArrayList<>(playerIds.size());
@@ -81,7 +84,7 @@ public class PlayerLogicHandler {
     }
 
     @UserEvent(IdleStateEvent.class) // 处理GameChannel空闲事件
-    public void idleStateEvent(UserEventContext utx, IdleStateEvent event, Promise<Object> promise) {
+    public void idleStateEvent(UserEventContext<PlayerManager> utx, IdleStateEvent event, Promise<Object> promise) {
         logger.debug("收到空闲事件：{}", event.getClass().getName());
         // Channel空闲时，关闭Channel。会自动清理GameChannel的缓存
         utx.getCtx().close();

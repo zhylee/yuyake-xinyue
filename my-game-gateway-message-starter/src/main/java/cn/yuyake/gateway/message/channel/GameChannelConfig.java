@@ -12,6 +12,10 @@ public class GameChannelConfig {
     private String businessGameMessageTopic = "business-game-message-topic";
     // 网关接收消息监听的topic
     private String gatewayGameMessageTopic = "gateway-game-message-topic";
+    // RPC request topic
+    private String rpcRequestGameMessageTopic = "rpc-request-game-message-topic";
+    // RPC request topic
+    private String rpcResponseGameMessageTopic = "rpc-response-game-message-topic";
     // kafka消息的groupId，一个服务一个唯一的groupId
     private String topicGroupId = "defaultGroupId:" + UUID.randomUUID();
 
@@ -47,5 +51,21 @@ public class GameChannelConfig {
 
     public void setWorkerThreads(int workerThreads) {
         this.workerThreads = workerThreads;
+    }
+
+    public String getRpcRequestGameMessageTopic() {
+        return rpcRequestGameMessageTopic;
+    }
+
+    public void setRpcRequestGameMessageTopic(String rpcRequestGameMessageTopic) {
+        this.rpcRequestGameMessageTopic = rpcRequestGameMessageTopic;
+    }
+
+    public String getRpcResponseGameMessageTopic() {
+        return rpcResponseGameMessageTopic;
+    }
+
+    public void setRpcResponseGameMessageTopic(String rpcResponseGameMessageTopic) {
+        this.rpcResponseGameMessageTopic = rpcResponseGameMessageTopic;
     }
 }

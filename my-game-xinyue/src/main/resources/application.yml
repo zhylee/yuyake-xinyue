@@ -52,4 +52,6 @@ game:
   channel:
     gateway-game-message-topic: gateway-game-message-topic
     business-game-message-topic: business-game-message-topic
+    rpc-request-game-message-topic: rpc-request-game-message-topic
+    rpc-response-game-message-topic: rpc-response-game-message-topic
     topic-group-id: ${game.server.config.server-id}
