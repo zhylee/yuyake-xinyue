@@ -33,4 +33,17 @@ public class GameEventSystemTest extends AbstractTestNGSpringContextTests {
         event.setPlayerId(1);
         GameEventSystem.sendGameEvent(this, event);
     }
+
+    @Test
+    public void springBootPublish() {
+        // 产生一个事件
+        SpringBootEvent event = new SpringBootEvent(this);
+        // 设置事件信息
+        event.setPlayerId(1);
+        // 发布事件
+        context.publishEvent(event);
+        // 测试其他事件
+        SpringBootEvent2 event2 = new SpringBootEvent2(this);
+        context.publishEvent(event2);
+    }
 }
