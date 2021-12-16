@@ -6,6 +6,8 @@ public class Hero implements Cloneable {
 
     private String heroId;
     private ConcurrentHashMap<String ,HeroSkill> skillMap;
+    private int level;
+    private String weaponId;
 
     public String getHeroId() {
         return heroId;
@@ -21,5 +23,21 @@ public class Hero implements Cloneable {
 
     public void setSkillMap(ConcurrentHashMap<String, HeroSkill> skillMap) {
         this.skillMap = skillMap;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public String getWeaponId() {
+        return weaponId;
+    }
+
+    public void setWeaponId(String weaponId) {
+        this.weaponId = weaponId;
     }
 }

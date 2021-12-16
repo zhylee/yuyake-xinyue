@@ -23,6 +23,8 @@ public class Player {
     private ConcurrentHashMap<String, Hero> heroMap = new ConcurrentHashMap<>();
     // 任务
     private Task task = new Task();
+    // 背包
+    private Inventory inventory = new Inventory();
 
     public long getPlayerId() {
         return playerId;
@@ -94,5 +96,13 @@ public class Player {
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(Inventory inventory) {
+        this.inventory = inventory;
     }
 }

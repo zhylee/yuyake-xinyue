@@ -1,6 +1,8 @@
 package cn.yuyake.db.entity.manager;
 
+import cn.yuyake.db.entity.Hero;
 import cn.yuyake.db.entity.Player;
+import cn.yuyake.db.entity.Weapon;
 
 public class PlayerManager {
     // 声明数据对象
@@ -9,6 +11,8 @@ public class PlayerManager {
     private final HeroManager heroManager;
     // 任务管理类
     private final TaskManager taskManager;
+    // 背包管理类
+    private final InventoryManager inventoryManager;
     // 声明其他的管理类...
 
     // 初始化所有的管理类
@@ -16,6 +20,7 @@ public class PlayerManager {
         this.player = player;
         this.heroManager = new HeroManager(player);
         this.taskManager = new TaskManager(player.getTask());
+        this.inventoryManager = new InventoryManager(player.getInventory());
         // 其他的管理类...
     }
 
@@ -28,11 +33,23 @@ public class PlayerManager {
         return player;
     }
 
+    public Hero getHero(String heroId) {
+        return this.heroManager.getHero(heroId);
+    }
+
+    public Weapon getWeapon(String weaponId) {
+        return this.inventoryManager.getWeapon(weaponId);
+    }
+
     public HeroManager getHeroManager() {
         return heroManager;
     }
 
     public TaskManager getTaskManager() {
         return taskManager;
+    }
+
+    public InventoryManager getInventoryManager() {
+        return inventoryManager;
     }
 }

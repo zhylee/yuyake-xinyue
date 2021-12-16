@@ -1,5 +1,6 @@
 package cn.yuyake.db.entity.manager;
 
+import cn.yuyake.common.error.GameErrorException;
 import cn.yuyake.db.entity.Hero;
 import cn.yuyake.db.entity.HeroSkill;
 import cn.yuyake.db.entity.Player;
@@ -49,5 +50,23 @@ public class HeroManager {
         int skillLv = heroSkill.getLevel();
         // 根据等级判断是否达到最大等级
         return skillLv >= 100;
+    }
+
+    public void checkHeroExist(String heroId) {
+        if (!this.heroMap.containsKey(heroId)) {
+            throw GameErrorException.newBuilder(GameErrorCode.HeroNotExist).build();
+        }
+    }
+
+    public void checkHadEquipWeapon(Hero hero) {
+        if (hero.getWeaponId() != null) {
+            throw GameErrorException.newBuilder(GameErrorCode.HeroHadEquipWeapon).build();
+        }
+    }
+
+    public void checkHeroLevelEnough(int heroLevel, int needLevel) {
+        if (heroLevel < needLevel) {
+            throw GameErrorException.newBuilder(GameErrorCode.HeroLevelNotEnough).message("需要等级：{}", needLevel).build();
+        }
     }
 }
