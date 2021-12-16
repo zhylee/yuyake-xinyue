@@ -21,6 +21,8 @@ public class Player {
     private Map<String, Integer> map = new HashMap<>();
     // 正式情况下，要使用线程安全的ConcurrentHashMap
     private ConcurrentHashMap<String, Hero> heroMap = new ConcurrentHashMap<>();
+    // 任务
+    private Task task = new Task();
 
     public long getPlayerId() {
         return playerId;
@@ -84,5 +86,13 @@ public class Player {
 
     public void setHeroMap(ConcurrentHashMap<String, Hero> heroMap) {
         this.heroMap = heroMap;
+    }
+
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
     }
 }

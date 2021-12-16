@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * TODO 英雄管理类
+ * 英雄管理类
  */
 public class HeroManager {
     private static final Logger logger = LoggerFactory.getLogger(HeroManager.class);

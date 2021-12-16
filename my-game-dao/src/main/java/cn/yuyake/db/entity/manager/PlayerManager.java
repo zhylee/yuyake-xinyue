@@ -7,12 +7,15 @@ public class PlayerManager {
     private final Player player;
     // 英雄管理类
     private final HeroManager heroManager;
+    // 任务管理类
+    private final TaskManager taskManager;
     // 声明其他的管理类...
 
     // 初始化所有的管理类
     public PlayerManager(Player player) {
         this.player = player;
         this.heroManager = new HeroManager(player);
+        this.taskManager = new TaskManager(player.getTask());
         // 其他的管理类...
     }
 
@@ -27,5 +30,9 @@ public class PlayerManager {
 
     public HeroManager getHeroManager() {
         return heroManager;
+    }
+
+    public TaskManager getTaskManager() {
+        return taskManager;
     }
 }
