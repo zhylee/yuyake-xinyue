@@ -68,6 +68,14 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         // 引入 TestNG 单元测试框架
         testImplementation 'org.testng:testng:7.4.0'
+        // 引入 PowerMock
+        testImplementation('org.powermock:powermock-module-testng:2.0.9') {
+            exclude group: 'org.javassist'
+            exclude group: 'org.testng'
+        }
+        testImplementation('org.powermock:powermock-api-mockito2:2.0.9') {
+            exclude group: 'org.mockito', module: 'mockito-core'
+        }
         // 引入配置管理
         implementation 'org.springframework.boot:spring-boot-configuration-processor'
         // 引入健康监控
