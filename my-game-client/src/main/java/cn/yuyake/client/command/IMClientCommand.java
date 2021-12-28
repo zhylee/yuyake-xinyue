@@ -6,6 +6,7 @@ import cn.yuyake.client.service.GameClientConfig;
 import cn.yuyake.common.utils.CommonField;
 import cn.yuyake.common.utils.GameHttpClient;
 import cn.yuyake.game.message.ConfirmMsgRequest;
+import cn.yuyake.game.message.im.CrossSendIMMsgRequest;
 import cn.yuyake.game.message.im.SendIMMsgRequest;
 import cn.yuyake.http.MessageCode;
 import cn.yuyake.http.request.CreatePlayerParam;
@@ -119,6 +120,14 @@ public class IMClientCommand {
         SendIMMsgRequest request = new SendIMMsgRequest();
         request.getBodyObj().setChat(chatMsg);
         //向my-game-xinyue服务器发送聊天信息
+        gameClientBoot.getChannel().writeAndFlush(request);
+    }
+
+    @ShellMethod("send-cross [chat msg]")
+    public void sendCross(@ShellOption String chatMsg) {
+        CrossSendIMMsgRequest request = new CrossSendIMMsgRequest();
+        request.getBodyObj().setChat(chatMsg);
+        request.getBodyObj().setSender(nickName);
         gameClientBoot.getChannel().writeAndFlush(request);
     }
 }

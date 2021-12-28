@@ -1,0 +1,59 @@
+logging:
+  config: classpath:log4j2.xml # 配置日志路径
+server:
+  port: 7002 # 此服务的 Http 端口
+spring:
+  application:
+    name: game-im # 服务的应用名称
+  data:
+    mongodb: # 以下是配置数据库 MongoDB 的信息
+      host: 192.168.63.131 # 修改为自己的数据库地址
+      port: 27017
+      username: my-game # 修改为自己的数据库用户名
+      password: xxx123456 # 修改为自己的数据库密码
+      authentication-database: admin
+      database: my-game
+  redis: # 配置 Redis 信息
+    host: 192.168.63.131 # 修改为自己的 Redis 服务地址
+    port: 6379
+    password: R6YMtyPGS0f968IM
+    database: 10
+  cloud:
+    consul: # 配置注册到 Consul 的信息
+      host: 192.168.63.131
+      port: 8500
+      discovery:
+        prefer-ip-address: true
+        ip-address: 192.168.110.48
+        register: true
+        service-name: game-logic # 注册到 Consul 上面的服务名称，用于区分此服务是否为游戏逻辑
+        health-check-critical-timeout: 30s
+        metadata:
+          serviceId: ${game.server.config.service-id} # 服务的serviceId，用于获取一组服务
+          serverId: ${game.server.config.server-id} # 服务的serverId，用于定位某一个具体的服务
+          weight: 3 # 服务器负载权重
+    bus:
+      enabled: true
+    stream:
+      kafka:
+        binder:
+          brokers: 192.168.63.131:9092 # 配置 Kafka 地址
+  kafka:
+    producer:
+      bootstrap-servers: 192.168.63.131:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer  # 指定生产者的Key的序列化方式
+    bootstrap-servers: 192.168.63.131:9092
+
+game:
+  server:
+    config:
+      service-id: 103 # 服务器中配置服务ID
+      server-id: 10301 # 当前服务器的ID
+      business-game-message-topic: business-game-message-topic-${game.server.config.server-id} # 用于测试，后期可以删除
+      gateway-game-message-topic: gateway-game-message-topic # 用于测试，后期可以删除
+  channel:
+    gateway-game-message-topic: gateway-game-message-topic #网关监听的topic，用于接收发送给网关的消息
+    business-game-message-topic: business-game-message-topic #业务服务监听的topic，用于接收网关转发的消息
+    rpc-request-game-message-topic: rpc-request-game-message-topic #RPC接收端监听的topic,用于接收rpc的请求
+    rpc-response-game-message-topic: rpc-response-game-message-topic #RPC接收监听的topic，用于接收rpc的响应消息
+    topic-group-id: ${game.server.config.server-id} # 消费者组id

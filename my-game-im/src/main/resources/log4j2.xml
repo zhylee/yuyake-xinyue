@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 用于指定log4j自动重新配置的监测间隔时间,单位是秒 -->
+<configuration debug="off" monitorInterval="10">
+	<Properties>
+		<Property name="log-path">server_logs</Property>
+	</Properties>
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			
+			<PatternLayout
+				pattern="%d{HH:mm:ss} %t-%T %-5level %class{36}%n - %msg%xEx%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+	    <logger name = "cn.yuyake" level="debug" additivity = "false"><!-- addvility的解释见：http://ifeve.com/log4j-2-additivity/ -->
+	    	<appender-ref ref="console" />
+	    </logger>
+	    <logger name = "cn.yuyake.common.cloud.BusinessServerService" level = "info" additivity = "false">
+	    	<appender-ref ref="console" />
+	    </logger>
+		<root level="info">
+			<appender-ref ref="console" />
+		</root>
+	</Loggers>
+</configuration>

@@ -62,6 +62,10 @@ public class GatewayMessageConsumerService {
         gameChannelService = new GameMessageEventDispatchService(context, workerGroup, gameGatewayMessageSendFactory, gameRpcSendFactory, gameChannelInitializer);
     }
 
+    public GameMessageEventDispatchService getGameMessageEventDispatchService() {
+        return this.gameChannelService;
+    }
+
     // 指定监听的topic和组ID
     @KafkaListener(topics = {"${game.channel.business-game-message-topic}" + "-" + "${game.server.config.server-id}"}, groupId = "${game.channel.topic-group-id}")
     public void consume(ConsumerRecord<String, byte[]> record) {

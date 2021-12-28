@@ -10,4 +10,5 @@ include 'my-game-xinyue'
 include 'my-game-gateway-message-starter'
 include 'my-game-arena'
 include 'my-game-test-start'
+include 'my-game-im'
 
