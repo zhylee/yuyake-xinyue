@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="游戏核心服务单元测试">
+    <test name="基本单元测试">
+        <packages>
+            <package name="cn.yuyake.xinyue.service.*"/>
+            <!-- 配置测试要执行的包，这里可以配置多个 -->
+        </packages>
+    </test>
+</suite>

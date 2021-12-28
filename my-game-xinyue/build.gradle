@@ -1,4 +1,6 @@
 dependencies {
     implementation project(":my-game-gateway-message-starter")
     testImplementation project(":my-game-test-start")
+    // https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin
+    implementation 'org.apache.maven.plugins:maven-surefire-plugin:3.0.0-M5'
 }
