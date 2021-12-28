@@ -51,6 +51,16 @@ public class GatewayMessageContext<T> implements IGameChannelContext {
         }
     }
 
+    /**
+     * 将同一条消息广播给本服的所有人
+     * @param message 消息
+     */
+    public void broadcastMessage(IGameMessage message) {
+        if(message != null) {
+            ctx.gameChannel().getEventDispatchService().broadcastMessage(message);
+        }
+    }
+
     private void wrapResponseMessage(IGameMessage response) {
         GameMessageHeader responseHeader = response.getHeader();
         GameMessageHeader requestHeader = this.requestMessage.getHeader();
