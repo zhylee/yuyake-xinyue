@@ -1,0 +1,11 @@
+dependencies {
+    implementation project(":my-game-gateway-message-starter")
+    implementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'junit', module: 'junit'
+    }
+    implementation 'org.testng:testng:7.4.0'
+    implementation('org.powermock:powermock-module-testng:2.0.9') {
+        exclude group: 'org.javassist'
+        exclude group: 'org.testng'
+    }
+}

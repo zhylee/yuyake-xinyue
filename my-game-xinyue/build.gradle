@@ -1,3 +1,4 @@
 dependencies {
     implementation project(":my-game-gateway-message-starter")
+    testImplementation project(":my-game-test-start")
 }
