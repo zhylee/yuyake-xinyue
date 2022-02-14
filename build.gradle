@@ -8,7 +8,7 @@
 buildscript {
     // 定义公共版本号
     ext {
-        springBootVersion = "2.6.1"
+        springBootVersion = "2.6.3"
         springManagementVersion = "1.0.11.RELEASE"
         springCloudVersion = "2021.0.0"
     }
